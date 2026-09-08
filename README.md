@@ -194,7 +194,7 @@ pnpm build          # Next.js standalone
 
 - [`ci.yml`](.github/workflows/ci.yml)：每次 push / PR 依次执行以上五步，pnpm 缓存加速。
 - [`docker.yml`](.github/workflows/docker.yml)：推送 `v*.*.*` 标签时构建多阶段镜像并发布到 `ghcr.io/chunge-php/quanjian`。
-- 真实数据对比测试见 [`docs/测试报告-模板.md`](docs/测试报告-模板.md)。
+- 真实数据对比测试见 [`docs/测试报告.md`](docs/测试报告.md)。
 
 ---
 
