@@ -70,7 +70,7 @@ describe('请求校验', () => {
 
 describe('辅助路由', () => {
   it('/api/health 不泄露 AK', async () => {
-    const body = await (await healthGet()).json()
+    const body = await (await healthGet(new Request('http://localhost/api/health'))).json()
     expect(body.ok).toBe(true)
     expect(typeof body.hasServerAk).toBe('boolean')
     expect(typeof body.sampleCount).toBe('number')

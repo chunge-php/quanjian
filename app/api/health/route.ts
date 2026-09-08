@@ -8,8 +8,8 @@ import { listSamples } from '@/lib/pipeline/sample'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: Request) {
-  const deep = new URL(request.url).searchParams.get('deep') === '1'
+export async function GET(request?: Request) {
+  const deep = request ? new URL(request.url).searchParams.get('deep') === '1' : false
   let sampleCount = 0
   let sampleError: string | undefined
   try {
