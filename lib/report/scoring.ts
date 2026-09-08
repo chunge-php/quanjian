@@ -233,6 +233,24 @@ function buildSuggestions(
       })
     }
   }
+  // 中心点本身达标、但周边 1.5 km 内仍有盲区网格的硬指标：给出方位化的补点建议
+  const covered = new Set(out.map((s) => s.category))
+  for (const c of categories) {
+    if (!c.essential || covered.has(c.category)) continue
+    const count = blind.byCategory[c.category] ?? 0
+    const centroid = blind.centroidByCategory[c.category]
+    if (count === 0 || !centroid) continue
+    const dir = bearingToChinese(bearingBetween(iso.center, centroid))
+    const dist = ceilTo100(haversineM(iso.center, centroid))
+    const inIso = blind.inIsochroneCount > 0
+    out.push({
+      priority: inIso ? 'medium' : 'low',
+      category: c.category,
+      text: `中心点周边${c.label}达标，但${dir}方向约 ${dist} 米处有 ${count} 个网格 1 公里内没有${c.label}${
+        inIso ? '' : '（均在 15 分钟圈外）'
+      }，规划新点位时可优先考虑该方向`,
+    })
+  }
   const weakest = weakestDirection(iso)
   if (iso.circularity > 0 && iso.circularity < 0.5 && weakest) {
     out.push({

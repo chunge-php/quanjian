@@ -170,7 +170,7 @@ describe('buildOverall', () => {
     expect(market.text).toMatch(/^在.+方向 \d+ 米内增设一处菜市场可消除 \d+ 个盲区网格$/)
     // 菜市场全域缺失，质心≈中心，方位不限；小学/药店缺失网格在东侧
     const school = r.suggestions.find((s) => s.category === 'primary_school')
-    if (school) expect(school.text).toMatch(/^在东(北|南)?方向/)
+    if (school) expect(school.text).toMatch(/东(北|南)?方向/)
     expect(r.suggestions[0].priority).toBe('high')
     expect(r.overallScore).toBeLessThan(60)
     expect(r.headline[1]).toContain('缺少菜市场')

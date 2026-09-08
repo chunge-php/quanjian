@@ -40,6 +40,12 @@ export default function EChart({ option, height, className, ariaLabel }: Props) 
   }, [option])
 
   return (
-    <div ref={ref} className={className} style={{ height }} role="img" aria-label={ariaLabel} />
+    <div
+      ref={ref}
+      className={`echart-box ${className ?? ''}`}
+      style={{ height }}
+      role="img"
+      aria-label={ariaLabel}
+    />
   )
 }

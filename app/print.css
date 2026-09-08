@@ -20,7 +20,20 @@
     display: none !important;
   }
 
+  /* 主容器在屏幕上是 100dvh + overflow hidden，打印必须放开，否则只出第一页 */
+  main {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+  aside[aria-label='体检报告'] {
+    overflow: visible !important;
+    border-radius: 0 !important;
+  }
+
   .drawer {
+    display: block !important;
     position: static !important;
     transform: none !important;
     width: 100% !important;
@@ -33,8 +46,31 @@
     background: #fff !important;
   }
   .drawer-scroll {
+    display: block !important;
     overflow: visible !important;
     height: auto !important;
+    max-height: none !important;
+  }
+  .drawer-handle {
+    display: none !important;
+  }
+  /* 图表与分节不跨页截断 */
+  section,
+  canvas,
+  table {
+    break-inside: avoid;
+  }
+  /* ECharts 容器在打印时固定高度，避免 ResizeObserver 未触发时塌成 0 */
+  .echart-box {
+    height: 220px !important;
+    width: 100% !important;
+  }
+  /* 收紧分节间距，减少末页只剩图签的情况 */
+  .drawer-scroll section {
+    padding-top: 12px !important;
+  }
+  table[aria-label='报告图签'] {
+    margin-top: 12px;
   }
 
   .sheet {
