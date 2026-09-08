@@ -63,8 +63,12 @@
   /* ECharts 容器在打印时固定高度，避免 ResizeObserver 未触发时塌成 0 */
   /* 图表容器：保持组件自身高度，只裁掉超出部分（beforeprint 已按 A4 宽重绘） */
   .echart-box {
-    width: 100% !important;
-    overflow: hidden !important;
+    display: none !important;
+  }
+  .echart-print {
+    display: block !important;
+    width: 100%;
+    height: auto;
   }
   /* 页眉：thead 每页重复 */
   .print-frame {

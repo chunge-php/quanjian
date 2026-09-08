@@ -3,6 +3,7 @@ import { FACILITY_CATEGORIES } from '@/lib/categories'
 import SectionHead from '@/components/report/SectionHead'
 import { bearingToChinese, formatMeters, formatMinutes } from '@/lib/report/format'
 import { bearingBetween, haversineM } from '@/lib/isochrone/geo'
+import { explainBlindByDirection, explainPoiList, explainReach } from '@/lib/report/explain'
 
 const GRADE_WORD = { A: '优', B: '良', C: '中', D: '差' } as const
 const MAX_PER_CATEGORY = 8
@@ -72,9 +73,7 @@ export function PrintPoiList({ report }: { report: HealthReport }) {
   return (
     <section className="print-only px-5 pt-6">
       <SectionHead no="11" title="15 分钟圈内设施清单" note={`共 ${inIso.length} 处`} />
-      <p className="mt-1 text-[11px] text-[var(--ink-3)]">
-        每类最多列 {MAX_PER_CATEGORY} 处，按步行时间由近到远；步行分钟后的方位是相对中心点的方向。
-      </p>
+      <p className="mt-1 text-[11.5px] leading-5 text-[var(--ink-2)]">{explainPoiList(report)}</p>
       <div className="mt-2 columns-2 gap-6 text-[11.5px] leading-4">
         {groups.map((g) => (
           <div key={g.meta.key} className="mb-3 break-inside-avoid">
@@ -120,10 +119,7 @@ export function PrintMethod({ report }: { report: HealthReport }) {
     <>
       <section className="print-only print-avoid px-5 pt-6">
         <SectionHead no="12" title="各方向 15 分钟可达距离" note="米" />
-        <p className="mt-1 text-[11px] text-[var(--ink-3)]">
-          从中心点朝该方向沿路走 15
-          分钟能到多远。数字越小说明这个方向越「走不动」（绕路、被河或大路隔断）。
-        </p>
+        <p className="mt-1 text-[11.5px] leading-5 text-[var(--ink-2)]">{explainReach(report)}</p>
         <div className="mt-2 grid grid-cols-4 gap-x-4 gap-y-1 text-[11.5px]">
           {reach.map((r) => (
             <div key={r.bearingDeg} className="flex items-center gap-2">
@@ -143,9 +139,8 @@ export function PrintMethod({ report }: { report: HealthReport }) {
       {blindByDir.length > 0 && (
         <section className="print-only print-avoid px-5 pt-6">
           <SectionHead no="13" title="盲区分布" note="按方位统计" />
-          <p className="mt-1 text-[11px] text-[var(--ink-3)]">
-            每个方位有多少个 200 米网格缺硬指标，以及缺的是什么。「圈内」列是 15
-            分钟能走到却仍缺设施的网格数，优先级最高。
+          <p className="mt-1 text-[11.5px] leading-5 text-[var(--ink-2)]">
+            {explainBlindByDirection(report)}
           </p>
           <table className="mt-2 w-full border-collapse text-[11.5px]">
             <thead>

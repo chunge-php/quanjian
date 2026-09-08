@@ -135,6 +135,7 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
 
   const onPrint = () => {
     setDrawerOpen(true)
+    toast('打印对话框里请去掉「页眉和页脚」、勾选「背景图形」，导出效果最好', 'info', 6000)
     window.setTimeout(() => window.print(), 80)
   }
   const onExportSimulated = (simulated: HealthReport) =>
