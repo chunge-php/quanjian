@@ -399,3 +399,17 @@ aside[aria-label='体检报告'] .card {
 .print-frame > thead {
   display: none;
 }
+
+/* 抽屉左边缘拖拽把手：hover 时显示一条青线 */
+.drawer-resize::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: transparent;
+  transition: background-color 160ms var(--ease-out);
+}
+.drawer-resize:hover::after,
+.drawer-resize:active::after {
+  background: var(--teal);
+}

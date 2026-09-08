@@ -17,6 +17,7 @@ import SimulatePanel from '@/components/simulate/SimulatePanel'
 import { useSlots } from '@/lib/ui/useSlots'
 import { useSimulateWiring } from '@/lib/ui/useSimulateWiring'
 import { useHealth } from '@/lib/ui/useHealth'
+import { useDrawerWidth } from '@/lib/ui/useDrawerWidth'
 import { toast } from '@/lib/ui/toast'
 import { MOCK_CENTER } from '@/lib/ui/mockReport'
 
@@ -38,6 +39,7 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
   const { A, B, state, runningSlot, analyze, cancel, swap, removeB } = useSlots()
 
   const hasB = B.center != null
+  const drawerW = useDrawerWidth(hasB)
   const running = state.status === 'running'
   const focused = focus === 'B' && hasB ? B : A
   /** 模拟只作用于聚焦的一侧；切聚焦 = 报告换了 → 拟建列表自动清空（hook 内提示） */
@@ -178,7 +180,7 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
       : snap === 'half'
         ? Math.round(window.innerHeight * 0.5)
         : 132
-  const rightInset = isDesktop && drawerOpen ? 400 : 0
+  const rightInset = isDesktop && drawerOpen ? drawerW.width : 0
   const simOnMap = isDesktop && simw.open && !!focused.report
   const leftInset = simOnMap ? 368 : 0
   const compareMode: CompareMode = picking ? 'picking' : hasB ? 'on' : 'off'
@@ -279,7 +281,14 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
         />
       )}
 
-      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen} onSnapChange={setSnap}>
+      <Drawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        onSnapChange={setSnap}
+        width={drawerW.width}
+        resizeHandleProps={drawerW.handleProps}
+        onResizeToggle={drawerW.toggle}
+      >
         {!isDesktop && simw.open && simPanelProps && !simw.printReport && (
           <SimulatePanel className="mx-3 mb-2 mt-3" {...simPanelProps} />
         )}
