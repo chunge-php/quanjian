@@ -144,6 +144,28 @@
   .print-break {
     break-before: page;
   }
+  /* 地图快照：整图不跨页，打印铺满内容宽 */
+  .map-snapshot img {
+    break-inside: avoid;
+    border-radius: 4px;
+  }
+  /* 对比 PDF：每一节左 A 右 B 两列，表格与两列块不跨页 */
+  .cmp-print table,
+  .cmp-print .print-avoid {
+    break-inside: avoid;
+  }
+  /* 末尾不留空白：尾部内边距会把最后一行顶出一页 */
+  .cmp-print article {
+    padding-bottom: 0 !important;
+  }
+  .cmp-print .print-cover {
+    padding-bottom: 5mm;
+    margin-bottom: 2mm;
+  }
+  .cmp-print .echart-print {
+    max-height: 120mm;
+    object-fit: contain;
+  }
   .print-avoid {
     break-inside: avoid;
   }

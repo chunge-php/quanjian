@@ -140,6 +140,17 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
   }
   const onExportSimulated = (simulated: HealthReport) =>
     simw.exportSimulated(simulated, () => setDrawerOpen(true))
+  /** 对比模式下单独导出 A / B 完整报告：走同一套打印覆盖（设覆盖 → print → afterprint 清除） */
+  const onPrintSingle = (slot: Slot) => {
+    const r = slot === 'A' ? A.report : B.report
+    if (!r) return
+    toast(
+      `正在导出 ${slot} 的完整报告；打印对话框里请去掉「页眉和页脚」、勾选「背景图形」`,
+      'info',
+      6000
+    )
+    simw.exportSimulated(r, () => setDrawerOpen(true))
+  }
   /** 报告面板里的「模拟新建 / 去模拟」：对比模式先把聚焦切到该侧 */
   const onSimulateFrom = (slot: Slot, category?: FacilityCategory) => {
     if (picking) setPicking(false)
@@ -292,6 +303,7 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
             onChangeB={startCompare}
             onRemove={onRemove}
             onPrint={onPrint}
+            onPrintSingle={onPrintSingle}
             onRerun={onRerun}
             onRetryB={onRetryB}
             onSimulate={onSimulateFrom}

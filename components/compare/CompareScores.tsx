@@ -35,7 +35,7 @@ export default function CompareScores({ c }: { c: Comparison }) {
   )
 }
 
-function ScoreCol({
+export function ScoreCol({
   slot,
   report,
   name,

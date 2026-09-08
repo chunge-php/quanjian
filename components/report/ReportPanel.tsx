@@ -11,6 +11,7 @@ import Suggestions from '@/components/report/Suggestions'
 import IsochroneStats from '@/components/report/IsochroneStats'
 import ApiStatsDetails from '@/components/report/ApiStatsDetails'
 import TitleBlock from '@/components/report/TitleBlock'
+import MapSnapshot from '@/components/report/MapSnapshot'
 import PrintGuide, { PrintNote } from '@/components/report/PrintNotes'
 import PrintChrome, { PrintHeaderLine } from '@/components/report/PrintChrome'
 import PrintFrame from '@/components/report/PrintFrame'
@@ -48,6 +49,10 @@ export default function ReportPanel({
         <span className="sheet-corner right-2 top-2 hidden md:block" aria-hidden="true" />
 
         <PrintChrome report={report} label={printLabel} />
+        <section className="print-only print-avoid px-5">
+          <SectionHead no="01" title="地图与等时圈" note="百度静态图 · 圈内硬指标设施" />
+          <MapSnapshot report={report} />
+        </section>
         <ScoreHeader report={report} />
 
         {report.warnings.length > 0 && (
@@ -122,6 +127,7 @@ export default function ReportPanel({
             title="等时圈"
             note={`${report.isochrone.reachRadiusByBearing.length} 方向`}
           />
+          <MapSnapshot report={report} className="no-print mb-3" />
           <IsochroneStats iso={report.isochrone} />
           <PrintNote>
             怎么看：三个数字是 5、10、15 分钟各能覆盖多大面积；「等效半径」是把 15

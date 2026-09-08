@@ -7,10 +7,9 @@ import type { AnalyzeState } from '@/lib/ui/useAnalyze'
 import type { SlotView } from '@/lib/ui/useSlots'
 import { Icon } from '@/components/Icon'
 import ReportPanel from '@/components/report/ReportPanel'
-import { PrintHeaderLine } from '@/components/report/PrintChrome'
-import PrintFrame from '@/components/report/PrintFrame'
 import RunningPanel from '@/components/RunningPanel'
 import CompareView from '@/components/compare/CompareView'
+import ComparePrint from '@/components/compare/ComparePrint'
 import { SlotChip } from '@/components/compare/SlotChip'
 
 type Tab = 'compare' | 'A' | 'B'
@@ -28,6 +27,8 @@ interface Props {
   onChangeB: () => void
   onRemove: () => void
   onPrint: () => void
+  /** 单独导出 A 或 B 的完整报告（外壳用打印覆盖机制只打那一份） */
+  onPrintSingle?: (slot: Slot) => void
   onRerun: (slot: Slot) => void
   onRetryB: () => void
   /** 模拟新建：只作用于该槽位（外壳会先把聚焦切到该侧） */
@@ -36,7 +37,7 @@ interface Props {
 
 /**
  * 对比模式的抽屉内容：顶部对比视图，下方 tab 切 A / B 完整报告。
- * 打印时三段全出：对比视图 → A 报告 → B 报告（各自分页）。
+ * 打印时只输出 ComparePrint（逐项左右对照的一份文档）；A / B 完整报告各自用页签里的按钮单独导出。
  */
 export default function ComparePanel(p: Props) {
   const [tab, setTab] = useState<Tab>('compare')
@@ -82,19 +83,18 @@ export default function ComparePanel(p: Props) {
   ]
 
   return (
-    <div className="pb-6">
-      <div className={tab === 'compare' ? '' : 'hidden print:block'}>
-        <PrintFrame header={<PrintHeaderLine report={a} label="两地对比" />}>
-          <CompareView
-            a={a}
-            b={b}
-            onSwap={p.onSwap}
-            onChangeB={p.onChangeB}
-            onRemove={p.onRemove}
-            onPrint={p.onPrint}
-          />
-        </PrintFrame>
+    <div className="pb-6 print:pb-0">
+      <div className={tab === 'compare' ? 'print:hidden' : 'hidden'}>
+        <CompareView
+          a={a}
+          b={b}
+          onSwap={p.onSwap}
+          onChangeB={p.onChangeB}
+          onRemove={p.onRemove}
+          onPrint={p.onPrint}
+        />
       </div>
+      <ComparePrint a={a} b={b} nameA={p.nameA} nameB={p.nameB} />
 
       <div
         ref={tabBarRef}
@@ -123,26 +123,57 @@ export default function ComparePanel(p: Props) {
         })}
       </div>
 
-      <div className={`print-break ${tab === 'A' ? '' : 'hidden print:block'}`}>
+      <div className={tab === 'A' ? 'print:hidden' : 'hidden'}>
+        <ExportSingle slot="A" name={p.nameA} onPrintSingle={p.onPrintSingle} />
         <ReportPanel
           report={a}
           printLabel="地点 A"
           printing={p.printing}
-          onPrint={p.onPrint}
+          onPrint={p.onPrintSingle ? () => p.onPrintSingle?.('A') : p.onPrint}
           onRerun={() => p.onRerun('A')}
           onSimulate={p.onSimulate && ((c) => p.onSimulate?.('A', c))}
         />
       </div>
-      <div className={`print-break ${tab === 'B' ? '' : 'hidden print:block'}`}>
+      <div className={tab === 'B' ? 'print:hidden' : 'hidden'}>
+        <ExportSingle slot="B" name={p.nameB} onPrintSingle={p.onPrintSingle} />
         <ReportPanel
           report={b}
           printLabel="地点 B"
           printing={p.printing}
-          onPrint={p.onPrint}
+          onPrint={p.onPrintSingle ? () => p.onPrintSingle?.('B') : p.onPrint}
           onRerun={() => p.onRerun('B')}
           onSimulate={p.onSimulate && ((c) => p.onSimulate?.('B', c))}
         />
       </div>
+    </div>
+  )
+}
+
+/** 页签顶部：「导出 X 完整报告」——只打这一份，不带对比 */
+function ExportSingle({
+  slot,
+  name,
+  onPrintSingle,
+}: {
+  slot: Slot
+  name: string
+  onPrintSingle?: (slot: Slot) => void
+}) {
+  if (!onPrintSingle) return null
+  return (
+    <div className="no-print mx-5 mt-3 flex items-center justify-between gap-2 rounded-[var(--r-md)] border border-dashed border-[var(--line-strong)] px-3 py-2">
+      <p className="min-w-0 truncate text-xs text-[var(--ink-2)]">
+        {slot} · {name} 的完整体检报告
+      </p>
+      <button
+        type="button"
+        className="btn !min-h-8 shrink-0 text-xs"
+        onClick={() => onPrintSingle(slot)}
+        title="单独导出这一份完整报告，不带对比"
+      >
+        <Icon name="printer" size={14} />
+        导出 {slot} 完整报告
+      </button>
     </div>
   )
 }

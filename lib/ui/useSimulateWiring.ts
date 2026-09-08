@@ -24,7 +24,7 @@ export interface SimulateWiring {
   blindSpots: BlindSpotCell[] | null
   /** 打印覆盖：导出模拟结果时抽屉临时显示的报告，afterprint 清掉 */
   printReport: HealthReport | null
-  /** 「导出模拟结果到 PDF」：设覆盖并延时 window.print()，openDrawer 由外壳给 */
+  /** 「导出模拟结果到 PDF」/ 对比模式单独导出 A、B：设覆盖并延时 window.print()，openDrawer 由外壳给 */
   exportSimulated: (simulated: HealthReport, openDrawer: () => void) => void
   clearPrintReport: () => void
 }

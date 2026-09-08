@@ -12,6 +12,9 @@ import CompareRadar from '@/components/compare/CompareRadar'
 import CompareTable from '@/components/compare/CompareTable'
 import { CompareEssentials, MetricList } from '@/components/compare/CompareMetrics'
 import CompareConclusion from '@/components/compare/CompareConclusion'
+import CompareWalkBars from '@/components/compare/CompareWalkBars'
+import MapSnapshot, { MAP_SNAPSHOT_CAPTION } from '@/components/report/MapSnapshot'
+import { COMPARE_MAP_SIZE } from '@/components/compare/ComparePrint'
 
 interface Props {
   a: HealthReport
@@ -22,7 +25,7 @@ interface Props {
   onPrint: () => void
 }
 
-/** 对比视图：两列分数 → 雷达叠加 → 十类对照 → 硬指标 → 等时圈 / 盲区 → 结论 */
+/** 对比视图：两张地图 → 两列分数 → 雷达叠加 → 分组柱 → 十类对照 → 硬指标 → 等时圈 / 盲区 → 结论（打印版见 ComparePrint） */
 export default function CompareView({ a, b, onSwap, onChangeB, onRemove, onPrint }: Props) {
   const c = useMemo(() => buildComparison(a, b), [a, b])
   return (
@@ -74,12 +77,30 @@ export default function CompareView({ a, b, onSwap, onChangeB, onRemove, onPrint
       </section>
 
       <section className="print-avoid px-5">
-        <SectionHead no="01" title="综合评分" note="谁高谁标「更优」" />
+        <SectionHead no="01" title="地图与等时圈" note="百度静态图" />
+        <div className="grid grid-cols-2 gap-3">
+          {[['A', a] as const, ['B', b] as const].map(([slot, r]) => (
+            <div key={slot} className="min-w-0">
+              <p className="mb-1 flex items-center gap-1.5 text-xs text-[var(--ink-2)]">
+                <SlotChip slot={slot} size={14} />
+                <span className="min-w-0 truncate">{slot === 'A' ? c.nameA : c.nameB}</span>
+              </p>
+              <MapSnapshot report={r} caption={null} label={slot} {...COMPARE_MAP_SIZE} />
+            </div>
+          ))}
+        </div>
+        <p className="mt-1.5 text-[0.6875rem] leading-4 text-[var(--ink-3)]">
+          {MAP_SNAPSHOT_CAPTION}
+        </p>
+      </section>
+
+      <section className="print-avoid px-5 pt-5">
+        <SectionHead no="02" title="综合评分" note="谁高谁标「更优」" />
         <CompareScores c={c} />
       </section>
 
       <section className="print-avoid px-5 pt-5">
-        <SectionHead no="02" title="十类设施覆盖" note="雷达叠加 · 满分 100" />
+        <SectionHead no="03" title="十类设施覆盖" note="雷达叠加 · 满分 100" />
         <CompareRadar c={c} />
         <PrintNote>
           怎么看：两条线各是一地十类设施的得分，谁的图形更饱满谁的设施更齐；A 实线青色，B
@@ -88,27 +109,32 @@ export default function CompareView({ a, b, onSwap, onChangeB, onRemove, onPrint
       </section>
 
       <section className="print-avoid px-5 pt-5">
-        <SectionHead no="03" title="十类对照" note="最近一处步行分钟" />
+        <SectionHead no="04" title="最近步行分钟" note="每类两根柱 · 朱砂线 = 15 分钟" />
+        <CompareWalkBars c={c} />
+      </section>
+
+      <section className="print-avoid px-5 pt-5">
+        <SectionHead no="05" title="十类对照" note="最近一处步行分钟" />
         <CompareTable c={c} />
       </section>
 
       <section className="print-avoid px-5 pt-5">
-        <SectionHead no="04" title="硬指标" note="缺一项即盲区" />
+        <SectionHead no="06" title="硬指标" note="缺一项即盲区" />
         <CompareEssentials c={c} />
       </section>
 
       <section className="print-avoid px-5 pt-5">
-        <SectionHead no="05" title="等时圈" note="15 分钟能走多远" />
+        <SectionHead no="07" title="等时圈" note="15 分钟能走多远" />
         <MetricList rows={c.isoRows} label="等时圈指标对照" />
       </section>
 
       <section className="print-avoid px-5 pt-5">
-        <SectionHead no="06" title="服务盲区" note="200 m 网格 · 越少越好" />
+        <SectionHead no="08" title="服务盲区" note="200 m 网格 · 越少越好" />
         <MetricList rows={c.blindRows} label="盲区网格数对照" />
       </section>
 
       <section className="print-avoid px-5 pt-5">
-        <SectionHead no="07" title="结论" note="按类别分差自动生成" />
+        <SectionHead no="09" title="结论" note="按类别分差自动生成" />
         <CompareConclusion c={c} />
       </section>
     </article>
