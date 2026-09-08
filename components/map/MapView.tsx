@@ -1,6 +1,14 @@
 'use client'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import type { BlindSpotCell, Isochrone, LngLat, Poi } from '@/lib/types'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { BlindSpotCell, FacilityCategory, Isochrone, LngLat, Poi } from '@/lib/types'
+import {
+  applyPoiFilter,
+  countByCategory,
+  DEFAULT_FILTER,
+  onlyEssential,
+  toggleCategory,
+  type LayerFilter,
+} from '@/lib/ui/layerFilter'
 import { Icon } from '@/components/Icon'
 import { useBaiduMap, eventLngLat } from '@/components/map/useBaiduMap'
 import { useIsochroneLayer, useSampleLayer } from '@/components/map/useIsochroneLayer'
@@ -43,6 +51,9 @@ export default function MapView(props: MapViewProps) {
   const [selectedPoi, setSelectedPoi] = useState<Poi | null>(null)
   const [hover, setHover] = useState<CellHover | null>(null)
   const [bounds, setBounds] = useState({ w: 0, h: 0 })
+  const [filter, setFilter] = useState<LayerFilter>(DEFAULT_FILTER)
+  const visiblePois = useMemo(() => applyPoiFilter(pois, filter), [pois, filter])
+  const counts = useMemo(() => countByCategory(pois), [pois])
   const centerChangeRef = useRef(onCenterChange)
   centerChangeRef.current = onCenterChange
 
@@ -72,20 +83,20 @@ export default function MapView(props: MapViewProps) {
     return () => map.removeEventListener('click', handler)
   }, [map])
 
-  useIsochroneLayer(map, isochrone)
+  useIsochroneLayer(map, filter.showIsochrone ? isochrone : null)
   useSampleLayer(map, isochrone, showSamples)
-  useBlindSpotLayer(map, blindSpots, containerRef, setHover)
-  usePoiLayer(map, pois, setSelectedPoi)
+  useBlindSpotLayer(map, filter.showBlindSpots ? blindSpots : null, containerRef, setHover)
+  usePoiLayer(map, visiblePois, setSelectedPoi)
   useCenterMarker(
     map,
     center,
     useCallback((p: LngLat) => centerChangeRef.current(p, 'drag'), [])
   )
 
-  // 选中的 POI 若已不在列表里（重新分析），关闭信息条
+  // 选中的 POI 若已不在可见列表里（重新分析 / 被筛掉），关闭信息条
   useEffect(() => {
-    setSelectedPoi((cur) => (cur && pois?.some((p) => p.uid === cur.uid) ? cur : null))
-  }, [pois])
+    setSelectedPoi((cur) => (cur && visiblePois?.some((p) => p.uid === cur.uid) ? cur : null))
+  }, [visiblePois])
 
   // 视野适配：等时圈出来后一次性 fit
   useEffect(() => {
@@ -139,7 +150,17 @@ export default function MapView(props: MapViewProps) {
         </div>
       )}
       {status === 'ready' && (
-        <MapLegend hasBlindSpots={!!blindSpots && blindSpots.length > 0} rightInset={rightInset} />
+        <MapLegend
+          hasBlindSpots={!!blindSpots && blindSpots.length > 0}
+          hasPois={!!pois && pois.length > 0}
+          rightInset={rightInset}
+          filter={filter}
+          counts={counts}
+          onToggleCategory={(k: FacilityCategory) => setFilter((f) => toggleCategory(f, k))}
+          onAllCategories={() => setFilter((f) => ({ ...f, categories: null }))}
+          onOnlyEssential={() => setFilter((f) => onlyEssential(f))}
+          onToggleLayer={(k) => setFilter((f) => ({ ...f, [k]: !f[k] }))}
+        />
       )}
       {selectedPoi && <PoiCard poi={selectedPoi} onClose={() => setSelectedPoi(null)} />}
       {hover && <BlindSpotTip hover={hover} bounds={bounds} />}
