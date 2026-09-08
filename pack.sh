@@ -15,6 +15,7 @@ grep -q '^NEXT_PUBLIC_BAIDU_BROWSER_AK=' .env.local || { echo ".env.local 里没
 export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}"
 echo "==> 安装依赖 & 构建"
 pnpm install --frozen-lockfile
+[ -f node_modules/next/dist/bin/next ] || { echo "==> node_modules 不完整，强制重装"; pnpm install --force; }
 pnpm build
 echo "==> 组装 standalone"
 rm -rf dist/pkg && mkdir -p dist/pkg

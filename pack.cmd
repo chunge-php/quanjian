@@ -13,6 +13,11 @@ if not exist .env.local ( echo 缺 .env.local（构建需要 NEXT_PUBLIC_BAIDU_B
 findstr /b "NEXT_PUBLIC_BAIDU_BROWSER_AK=" .env.local >nul || ( echo .env.local 里没有 NEXT_PUBLIC_BAIDU_BROWSER_AK & exit /b 1 )
 echo ==^> 安装依赖 ^& 构建
 call pnpm install --frozen-lockfile || exit /b 1
+REM node_modules 被清过/残缺时 pnpm 会误报 "Already up to date"，核对关键文件不在就强制重装
+if not exist node_modules\next\dist\bin\next (
+  echo ==^> node_modules 不完整，强制重装
+  call pnpm install --force || exit /b 1
+)
 call pnpm build || exit /b 1
 echo ==^> 组装 standalone
 if exist dist\pkg rmdir /s /q dist\pkg
