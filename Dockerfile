@@ -2,14 +2,14 @@
 # 圈见 · 多阶段构建：deps → builder → runner（standalone 输出，非 root 运行）
 
 # ---------- 1. 安装依赖 ----------
-FROM node:20-alpine AS deps
+FROM node:26-alpine AS deps
 RUN apk add --no-cache libc6-compat && corepack enable && corepack prepare pnpm@9.12.0 --activate
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # ---------- 2. 构建 ----------
-FROM node:20-alpine AS builder
+FROM node:26-alpine AS builder
 RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -21,7 +21,7 @@ ENV NEXT_PUBLIC_BAIDU_BROWSER_AK=$NEXT_PUBLIC_BAIDU_BROWSER_AK \
 RUN pnpm build
 
 # ---------- 3. 运行 ----------
-FROM node:20-alpine AS runner
+FROM node:26-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
