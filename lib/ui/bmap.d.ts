@@ -38,6 +38,19 @@ declare namespace BMapGL {
     removeEventListener(type: string, handler: EventHandler): void
     hide(): void
     show(): void
+    /** 自定义覆盖物：加入地图时调用，返回要挂进 pane 的 DOM */
+    initialize?(map: Map): HTMLElement
+    /** 自定义覆盖物：每次地图移动/缩放后重定位 */
+    draw?(): void
+  }
+  interface MapPanes {
+    floatPane: HTMLElement
+    markerMouseTarget: HTMLElement
+    markerPane: HTMLElement
+    labelPane: HTMLElement
+    floatShadow: HTMLElement
+    markerShadow: HTMLElement
+    mapPane: HTMLElement
   }
   class Map {
     constructor(container: HTMLElement | string, opts?: MapOptions)
@@ -57,6 +70,7 @@ declare namespace BMapGL {
     removeEventListener(type: string, handler: EventHandler): void
     pointToPixel(point: Point): Pixel
     pointToOverlayPixel(point: Point): Pixel
+    getPanes(): MapPanes
     setMapStyleV2(opts: { styleId?: string; styleJson?: unknown[] }): void
     destroy(): void
     getContainer(): HTMLElement
