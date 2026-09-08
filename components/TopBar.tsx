@@ -58,8 +58,8 @@ export default function TopBar({
   return (
     <>
       <div
-        className="map-ui no-print pointer-events-none absolute top-3 z-[var(--z-map-ui)] hidden items-stretch gap-2 md:flex"
-        style={{ right: rightInset + 12 }}
+        className="map-ui no-print pointer-events-none absolute top-3 z-[var(--z-map-ui)] hidden flex-wrap items-stretch justify-end gap-2 md:flex"
+        style={{ right: rightInset + 12, left: 'calc(26rem + 2rem)' }}
       >
         <div className="panel pointer-events-auto flex items-center border border-[var(--ink)] bg-[var(--paper)] px-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
