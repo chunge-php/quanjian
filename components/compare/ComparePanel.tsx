@@ -7,6 +7,8 @@ import type { AnalyzeState } from '@/lib/ui/useAnalyze'
 import type { SlotView } from '@/lib/ui/useSlots'
 import { Icon } from '@/components/Icon'
 import ReportPanel from '@/components/report/ReportPanel'
+import { PrintHeaderLine } from '@/components/report/PrintChrome'
+import PrintFrame from '@/components/report/PrintFrame'
 import RunningPanel from '@/components/RunningPanel'
 import CompareView from '@/components/compare/CompareView'
 import { SlotChip } from '@/components/compare/SlotChip'
@@ -82,14 +84,16 @@ export default function ComparePanel(p: Props) {
   return (
     <div className="pb-6">
       <div className={tab === 'compare' ? '' : 'hidden print:block'}>
-        <CompareView
-          a={a}
-          b={b}
-          onSwap={p.onSwap}
-          onChangeB={p.onChangeB}
-          onRemove={p.onRemove}
-          onPrint={p.onPrint}
-        />
+        <PrintFrame header={<PrintHeaderLine report={a} label="两地对比" />}>
+          <CompareView
+            a={a}
+            b={b}
+            onSwap={p.onSwap}
+            onChangeB={p.onChangeB}
+            onRemove={p.onRemove}
+            onPrint={p.onPrint}
+          />
+        </PrintFrame>
       </div>
 
       <div
@@ -122,6 +126,7 @@ export default function ComparePanel(p: Props) {
       <div className={`print-break ${tab === 'A' ? '' : 'hidden print:block'}`}>
         <ReportPanel
           report={a}
+          printLabel="地点 A"
           printing={p.printing}
           onPrint={p.onPrint}
           onRerun={() => p.onRerun('A')}
@@ -131,6 +136,7 @@ export default function ComparePanel(p: Props) {
       <div className={`print-break ${tab === 'B' ? '' : 'hidden print:block'}`}>
         <ReportPanel
           report={b}
+          printLabel="地点 B"
           printing={p.printing}
           onPrint={p.onPrint}
           onRerun={() => p.onRerun('B')}

@@ -17,7 +17,7 @@ export function PrintCategoryTable({ report }: { report: HealthReport }) {
           <tr className="border-b border-[var(--ink)] text-left text-[var(--ink-3)]">
             <th className="py-1 pr-2 font-normal">类别</th>
             <th className="py-1 pr-2 font-normal">评级</th>
-            <th className="py-1 pr-2 font-normal">圈内 / 1 公里内</th>
+            <th className="py-1 pr-2 font-normal">圈内/1km</th>
             <th className="py-1 pr-2 font-normal">最近一处</th>
             <th className="py-1 pr-2 font-normal">步行</th>
             <th className="py-1 font-normal">一句话结论</th>

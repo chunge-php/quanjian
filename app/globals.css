@@ -385,3 +385,17 @@ aside[aria-label='体检报告'] .card {
 .print-only {
   display: none;
 }
+
+/* 打印页眉框架：屏幕上当普通块用，thead 隐藏 */
+.print-frame,
+.print-frame > tbody,
+.print-frame > tbody > tr,
+.print-frame > tbody > tr > td {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+}
+.print-frame > thead {
+  display: none;
+}
