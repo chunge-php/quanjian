@@ -57,7 +57,9 @@ export function useCenterMarker(
   center: LngLat | null,
   onDragEnd: (p: LngLat) => void,
   /** 对比模式：A 青 / B 赭，圈里带字母；不传 = 单点朱砂 */
-  slot?: 'A' | 'B'
+  slot?: 'A' | 'B',
+  /** 是否允许拖动（街道体检模式下关闭，拖动会误触发单点分析） */
+  draggable = true
 ) {
   const cbRef = useRef(onDragEnd)
   cbRef.current = onDragEnd
@@ -71,7 +73,7 @@ export function useCenterMarker(
     })
     const marker = new B.Marker(new B.Point(center?.lng ?? 0, center?.lat ?? 0), {
       icon,
-      enableDragging: true,
+      enableDragging: draggable,
       title: slot ? `${slot} 中心点（可拖动）` : '分析中心点（可拖动）',
     })
     marker.addEventListener('dragend', () => {
@@ -87,7 +89,7 @@ export function useCenterMarker(
     }
     // 只在 map / 槽位样式变化时重建，位置变化走 setPosition
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, slot])
+  }, [map, slot, draggable])
 
   useEffect(() => {
     const B = window.BMapGL

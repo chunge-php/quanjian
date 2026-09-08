@@ -14,6 +14,9 @@ import EmptyState from '@/components/report/EmptyState'
 import RunningPanel from '@/components/RunningPanel'
 import ComparePanel from '@/components/compare/ComparePanel'
 import SimulatePanel from '@/components/simulate/SimulatePanel'
+import BatchSetup from '@/components/batch/BatchSetup'
+import BatchDrawer, { batchSetupProps } from '@/components/batch/BatchDrawer'
+import { useBatchWiring } from '@/components/batch/useBatchWiring'
 import { useSlots } from '@/lib/ui/useSlots'
 import { useSimulateWiring } from '@/lib/ui/useSimulateWiring'
 import { useHealth } from '@/lib/ui/useHealth'
@@ -45,6 +48,16 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
   /** 模拟只作用于聚焦的一侧；切聚焦 = 报告换了 → 拟建列表自动清空（hook 内提示） */
   const simw = useSimulateWiring(focused.report)
   const { sim, clearPrintReport } = simw
+  /** 街道体检：进入时关模拟面板、退出选对比点，和模拟面板互斥 */
+  const batch = useBatchWiring({
+    mock,
+    isDesktop,
+    onEnter: () => {
+      simw.closePanel()
+      setPicking(false)
+    },
+    setDrawerOpen,
+  })
 
   useEffect(() => {
     if (backendDown) setMock(true)
@@ -98,9 +111,13 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
   )
 
   /** 搜索框 / 样例选中：选 B 模式落到 B，否则 A */
+  const { onSearchPick: batchSearchPick } = batch
   const onSearchPick = useCallback(
-    (c: LngLat, label?: string) => analyzeSlot(picking ? 'B' : 'A', c, label),
-    [analyzeSlot, picking]
+    (c: LngLat, label?: string) => {
+      if (batchSearchPick(c, label)) return
+      analyzeSlot(picking ? 'B' : 'A', c, label)
+    },
+    [analyzeSlot, picking, batchSearchPick]
   )
   /** 地图点击 / 拖标：选 B 模式一律落到 B；否则由 MapView 按聚焦槽位决定 */
   const onCenterChange = useCallback(
@@ -181,8 +198,9 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
         ? Math.round(window.innerHeight * 0.5)
         : 132
   const rightInset = isDesktop && drawerOpen ? drawerW.width : 0
-  const simOnMap = isDesktop && simw.open && !!focused.report
-  const leftInset = simOnMap ? 368 : 0
+  const simOnMap = isDesktop && simw.open && !!focused.report && !batch.active
+  const batchOnMap = isDesktop && batch.active
+  const leftInset = simOnMap || batchOnMap ? 368 : 0
   const compareMode: CompareMode = picking ? 'picking' : hasB ? 'on' : 'off'
   const nameA = A.label ?? slotName(A.report)
   const nameB = B.label ?? slotName(B.report)
@@ -235,22 +253,28 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
         fitKey={fitKey}
         onCenterChange={onCenterChange}
         onStatus={onMapStatus}
+        batch={batch.mapProps}
       />
 
       <SearchBox
-        busy={running}
+        busy={running || batch.mode === 'running'}
         mock={mock}
         region={A.report?.address.city || '重庆市'}
         compareMode={picking}
         onCancelCompare={() => setPicking(false)}
+        batchMode={batch.pickingCenter}
+        onCancelBatch={batch.exit}
         onPick={onSearchPick}
       />
       <TopBar
-        canPrint={!!A.report}
-        canCompare={!!A.report && !running}
+        canPrint={!!A.report || !!batch.state.report}
+        canBatch={!running && !picking}
+        batch={batch.mode}
+        onBatch={batch.toggle}
+        canCompare={!!A.report && !running && !batch.active}
         compare={compareMode}
         onCompare={() => (picking ? setPicking(false) : startCompare())}
-        canSimulate={!!focused.report && !running}
+        canSimulate={!!focused.report && !running && !batch.active}
         simulate={simw.mode}
         onSimulate={openSimulate}
         onPrint={onPrint}
@@ -280,6 +304,12 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
           {...simPanelProps}
         />
       )}
+      {batchOnMap && (
+        <BatchSetup
+          className="map-ui no-print absolute bottom-4 left-4 z-[var(--z-overlay)] w-[22rem] max-h-[calc(100dvh-8rem)]"
+          {...batchSetupProps(batch)}
+        />
+      )}
 
       <Drawer
         open={drawerOpen}
@@ -298,6 +328,21 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
             printing={printing}
             onPrint={onPrint}
             onRerun={() => onRerun(focus)}
+          />
+        ) : batch.active ? (
+          <BatchDrawer
+            batch={batch}
+            isDesktop={isDesktop}
+            printing={printing}
+            onPrint={onPrint}
+            onExportPoint={(r) => {
+              toast(
+                '正在导出该点完整报告；打印对话框里请去掉「页眉和页脚」、勾选「背景图形」',
+                'info',
+                6000
+              )
+              simw.exportSimulated(r, () => setDrawerOpen(true))
+            }}
           />
         ) : hasB ? (
           <ComparePanel
@@ -335,7 +380,7 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
             onUseSample={() => analyzeSlot('A', MOCK_CENTER, '重庆璧山 · 东林大道')}
           />
         )}
-        {state.status === 'error' && !A.report && !hasB && (
+        {state.status === 'error' && !A.report && !hasB && !batch.active && (
           <div className="mx-5 mb-6 border border-[var(--vermilion)] px-4 py-3 text-sm">
             <p className="font-medium text-[var(--vermilion)]">分析失败</p>
             <p className="mt-1 break-words text-[var(--ink-2)]">{state.error}</p>

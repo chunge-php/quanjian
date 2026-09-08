@@ -31,6 +31,9 @@ interface Props {
   /** 对比地点模式：选定的地点作为 B 跑第二次分析 */
   compareMode?: boolean
   onCancelCompare?: () => void
+  /** 街道体检「选街道中心」模式：选定的地点只作为范围中心，不跑单点体检 */
+  batchMode?: boolean
+  onCancelBatch?: () => void
   onPick: (center: LngLat, label: string) => void
 }
 
@@ -41,6 +44,8 @@ export default function SearchBox({
   region,
   compareMode = false,
   onCancelCompare,
+  batchMode = false,
+  onCancelBatch,
   onPick,
 }: Props) {
   const [q, setQ] = useState('')
@@ -87,8 +92,8 @@ export default function SearchBox({
     setQ('')
     setPicked('')
     setActive(-1)
-    if (compareMode) inputRef.current?.focus()
-  }, [compareMode])
+    if (compareMode || batchMode) inputRef.current?.focus()
+  }, [compareMode, batchMode])
 
   useEffect(() => {
     if (mock) {
@@ -165,13 +170,34 @@ export default function SearchBox({
         className={`panel flex border bg-[var(--paper)] ${
           compareMode
             ? 'border-[var(--ochre)] ring-2 ring-[var(--ochre)]/25'
-            : 'border-[var(--ink)]'
+            : batchMode
+              ? 'border-[var(--teal)] ring-2 ring-[var(--teal)]/25'
+              : 'border-[var(--ink)]'
         }`}
         role="search"
       >
         <label htmlFor="addr" className="sr-only">
-          {compareMode ? '输入要对比的小区或地址' : '输入地址或小区名'}
+          {compareMode
+            ? '输入要对比的小区或地址'
+            : batchMode
+              ? '输入街道或小区名作为体检中心'
+              : '输入地址或小区名'}
         </label>
+        {batchMode && !compareMode && (
+          <span
+            className="flex shrink-0 items-center gap-1.5 border-r border-[var(--line-strong)] pl-2.5 pr-2 text-xs font-medium text-[var(--ink)]"
+            title="街道体检中心：搜索，或直接在地图上点一下"
+          >
+            <span
+              className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-[var(--paper)]"
+              style={{ background: 'var(--teal)' }}
+              aria-hidden="true"
+            >
+              ⌖
+            </span>
+            街道中心
+          </span>
+        )}
         {compareMode && (
           <span
             className="flex shrink-0 items-center gap-1.5 border-r border-[var(--line-strong)] pl-2.5 pr-2 text-xs font-medium text-[var(--ink)]"
@@ -192,7 +218,11 @@ export default function SearchBox({
           ref={inputRef}
           className="input !border-0 !shadow-none"
           placeholder={
-            compareMode ? '输入要对比的小区 / 地址' : '输入地址 / 小区名，或直接在地图上点一下'
+            compareMode
+              ? '输入要对比的小区 / 地址'
+              : batchMode
+                ? '输入街道 / 小区名'
+                : '输入地址 / 小区名，或直接在地图上点一下'
           }
           value={q}
           onChange={(e) => {
@@ -214,18 +244,25 @@ export default function SearchBox({
           type="submit"
           className="btn btn-primary !border-0 shrink-0"
           disabled={geocoding || busy || !q.trim()}
-          aria-label={compareMode ? '搜索并作为对比地点分析' : '搜索并分析'}
+          aria-label={
+            compareMode
+              ? '搜索并作为对比地点分析'
+              : batchMode
+                ? '搜索并设为街道体检中心'
+                : '搜索并分析'
+          }
         >
           <Icon name="search" size={16} />
           <span className="hidden sm:inline">
-            {geocoding ? '定位中…' : compareMode ? '对比' : '体检'}
+            {geocoding ? '定位中…' : compareMode ? '对比' : batchMode ? '定位' : '体检'}
           </span>
         </button>
-        {compareMode ? (
+        {compareMode || batchMode ? (
           <button
             type="button"
             className="btn !border-0 !border-l !border-l-[var(--line-strong)] shrink-0 !px-2.5 text-xs"
-            onClick={onCancelCompare}
+            onClick={compareMode ? onCancelCompare : onCancelBatch}
+            title={compareMode ? '取消选对比地点' : '退出街道体检'}
           >
             <Icon name="x" size={14} />
             取消

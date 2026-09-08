@@ -39,6 +39,15 @@ export const WEATHER_WAIT_MS = 1500
 
 type Emit = (e: AnalyzeEvent) => void
 
+/**
+ * runAnalysis 的扩展请求：在 AnalyzeRequest 之外允许指定采样半径列表（批量体检的快速模式用），
+ * 不传时行为与原来完全一致（采样层默认 7 个半径）。
+ */
+export type AnalyzeRunRequest = AnalyzeRequest & {
+  /** 采样半径列表（米，升序），缺省用采样层默认值 */
+  radiiM?: number[]
+}
+
 /** 一次分析的可变上下文 */
 interface Ctx {
   deps: PipelineDeps
@@ -121,10 +130,14 @@ async function stageGeocode(
 async function stageSamplesAndRouting(
   ctx: Ctx,
   center: LngLat,
-  bearings: number
+  bearings: number,
+  radiiM?: number[]
 ): Promise<IsochroneSample[]> {
   stage(ctx, 'sampling', `按 ${bearings} 个方向布设等时圈采样点`, 15)
-  const samples = ctx.deps.buildSamples(center, { bearings })
+  // 不用对象字面量直接传，避免 radiiM 触发多余属性检查；真实采样层会读取 radiiM
+  const sampleOpts: { bearings: number; radiiM?: number[] } = { bearings }
+  if (radiiM && radiiM.length > 0) sampleOpts.radiiM = radiiM
+  const samples = ctx.deps.buildSamples(center, sampleOpts)
   stage(ctx, 'routing', `正在对 ${samples.length} 个采样点做步行算路`, 20)
   try {
     const times = await ctx.deps.attachWalkTimes(
@@ -342,14 +355,14 @@ function awaitWeather(p: Promise<WeatherInfo | undefined>, ms: number) {
 
 /**
  * 运行完整分析流水线。
- * @param req 请求（center 必填，address 可选，bearings 默认 16）
+ * @param req 请求（center 必填，address 可选，bearings 默认 16；radiiM 可选，供批量快速模式减少采样半径）
  * @param emit SSE 事件回调
  * @param deps 依赖注入；缺省时动态绑定真实实现
  * @returns 体检报告（同时也通过 done 事件发出）
  * @throws 地理编码失败或样例不可用等致命错误（已先 emit error recoverable=false）
  */
 export async function runAnalysis(
-  req: AnalyzeRequest,
+  req: AnalyzeRunRequest,
   emit: (e: AnalyzeEvent) => void,
   deps?: PipelineDeps
 ): Promise<HealthReport> {
@@ -382,7 +395,7 @@ export async function runAnalysis(
   const weatherP = startWeather(ctx, center)
   const bearings = req.bearings && req.bearings >= 4 ? Math.min(req.bearings, 72) : DEFAULT_BEARINGS
 
-  const samples = await stageSamplesAndRouting(ctx, center, bearings)
+  const samples = await stageSamplesAndRouting(ctx, center, bearings, req.radiiM)
   const iso = stageIsochrone(ctx, center, samples)
   let pois = await stagePoiSearch(ctx, center)
 

@@ -290,7 +290,12 @@ export interface BatchReport {
   scoreMax: number
   scoreMin: number
   /** 各类别"15 分钟内可达"的点位占比 0-1 */
-  coverageByCategory: { category: FacilityCategory; label: string; essential: boolean; ratio: number }[]
+  coverageByCategory: {
+    category: FacilityCategory
+    label: string
+    essential: boolean
+    ratio: number
+  }[]
   /** 最差的三个点（index） */
   worst: number[]
   /** 最好的三个点 */

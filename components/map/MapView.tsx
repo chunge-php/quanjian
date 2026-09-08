@@ -22,6 +22,13 @@ import MapLegend from '@/components/map/MapLegend'
 import CompareSwitch from '@/components/map/CompareSwitch'
 import PoiCard from '@/components/map/PoiCard'
 import BlindSpotTip from '@/components/map/BlindSpotTip'
+import { useBatchLayer, type BatchPointHover } from '@/components/map/useBatchLayer'
+import { useAreaDraw } from '@/components/map/useAreaDraw'
+import BatchPointTip from '@/components/batch/BatchPointTip'
+import type { BatchMapProps } from '@/components/batch/batchTypes'
+
+const NO_VIRTUALS: VirtualFacility[] = []
+const noopRect = () => undefined
 
 export interface CompareLayerProps {
   center: LngLat | null
@@ -63,6 +70,8 @@ export interface MapViewProps {
   fitKey: number
   onCenterChange: (p: LngLat, source: 'click' | 'drag', slot: Slot) => void
   onStatus?: (status: 'loading' | 'ready' | 'error', error?: string) => void
+  /** 街道体检：非空 = 批量模式（隐藏 POI / 盲区 / 等时圈，地图点击不再触发单点体检） */
+  batch?: BatchMapProps | null
 }
 
 export default function MapView(props: MapViewProps) {
@@ -87,11 +96,16 @@ export default function MapView(props: MapViewProps) {
     fitKey,
     onCenterChange,
     onStatus,
+    batch = null,
   } = props
   const containerRef = useRef<HTMLDivElement>(null)
   const { map, status, error } = useBaiduMap(containerRef, center)
   const [selectedPoi, setSelectedPoi] = useState<Poi | null>(null)
   const [hover, setHover] = useState<CellHover | null>(null)
+  const [batchHover, setBatchHover] = useState<BatchPointHover | null>(null)
+  const batchActive = batch != null
+  const batchRef = useRef(batch)
+  batchRef.current = batch
   const [bounds, setBounds] = useState({ w: 0, h: 0 })
   const [filter, setFilter] = useState<LayerFilter>(DEFAULT_FILTER)
   const visiblePois = useMemo(() => applyPoiFilter(pois, filter), [pois, filter])
@@ -129,6 +143,12 @@ export default function MapView(props: MapViewProps) {
     const handler = (e: BMapGL.MapEvent) => {
       const p = eventLngLat(e)
       if (!p) return
+      const b = batchRef.current
+      if (b) {
+        // 批量模式：只有"选中心"吃点击；其余情况点击不触发单点体检
+        if (b.pickingCenter && !b.drawing) b.onMapClick(p)
+        return
+      }
       if (placingRef.current) placeRef.current(placingRef.current, p)
       else centerChangeRef.current(p, 'click', comparingRef.current ? focusRef.current : 'A')
     }
@@ -136,7 +156,8 @@ export default function MapView(props: MapViewProps) {
     return () => map.removeEventListener('click', handler)
   }, [map])
 
-  const showIso = filter.showIsochrone
+  // 批量模式下隐藏普通模式的等时圈 / POI / 盲区 / 拟建层，避免混乱
+  const showIso = filter.showIsochrone && !batchActive
   useIsochroneLayer(map, showIso && !comparing ? isochrone : null)
   useCompareLayer(map, showIso && comparing ? isochrone : null, 'A', focus === 'A')
   useCompareLayer(
@@ -145,15 +166,41 @@ export default function MapView(props: MapViewProps) {
     'B',
     focus === 'B'
   )
-  useSampleLayer(map, focusIsochrone, showSamples)
-  useBlindSpotLayer(map, filter.showBlindSpots ? blindSpots : null, containerRef, setHover)
-  usePoiLayer(map, visiblePois, setSelectedPoi)
-  useVirtualPoiLayer(map, virtuals, onRemoveVirtual)
+  useSampleLayer(map, focusIsochrone, showSamples && !batchActive)
+  useBlindSpotLayer(
+    map,
+    filter.showBlindSpots && !batchActive ? blindSpots : null,
+    containerRef,
+    setHover
+  )
+  usePoiLayer(map, batchActive ? null : visiblePois, setSelectedPoi)
+  useVirtualPoiLayer(map, batchActive ? NO_VIRTUALS : virtuals, onRemoveVirtual)
+  useBatchLayer(
+    map,
+    containerRef,
+    batch
+      ? {
+          ...batch,
+          insets: { right: rightInset, bottom: bottomInset, left: leftInset },
+          onHover: setBatchHover,
+        }
+      : null
+  )
+  useAreaDraw(map, !!batch?.drawing, batch?.onRectDrawn ?? noopRect, batch?.onRectTooBig)
+  // 街道体检：点排名表 → 定位到该点
+  const batchPanKey = batch?.pan?.key ?? 0
+  useEffect(() => {
+    const B = window.BMapGL
+    const target = batchRef.current?.pan
+    if (!map || !B || !target || batchPanKey === 0) return
+    map.panTo(new B.Point(target.point.lng, target.point.lat))
+  }, [map, batchPanKey])
   useCenterMarker(
     map,
     center,
     useCallback((p: LngLat) => centerChangeRef.current(p, 'drag', 'A'), []),
-    comparing ? 'A' : undefined
+    comparing ? 'A' : undefined,
+    !batchActive
   )
   useCenterMarker(
     map,
@@ -208,7 +255,16 @@ export default function MapView(props: MapViewProps) {
       <div
         ref={containerRef}
         className={`map-canvas absolute inset-0 bg-[var(--paper-2)] ${placing ? 'map-placing' : ''}`}
-        aria-label={placing ? '放置模式：点击地图放置拟建设施' : '地图：点击任意位置设为分析中心点'}
+        style={batch?.drawing || batch?.pickingCenter ? { cursor: 'crosshair' } : undefined}
+        aria-label={
+          batch?.drawing
+            ? '框选模式：按住拖出矩形范围'
+            : batch?.pickingCenter
+              ? '选中心模式：点击地图设为街道体检中心'
+              : placing
+                ? '放置模式：点击地图放置拟建设施'
+                : '地图：点击任意位置设为分析中心点'
+        }
       />
       {status === 'loading' && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -246,6 +302,7 @@ export default function MapView(props: MapViewProps) {
           hasIsochrone={!!focusIsochrone}
           hasVirtuals={virtuals.length > 0}
           compare={comparing}
+          batch={batchActive}
           rightInset={rightInset}
           filter={filter}
           counts={counts}
@@ -257,10 +314,11 @@ export default function MapView(props: MapViewProps) {
           onToggleLayer={(k) => setFilter((f) => ({ ...f, [k]: !f[k] }))}
         />
       )}
-      {selectedPoi && (
+      {selectedPoi && !batchActive && (
         <PoiCard poi={selectedPoi} onClose={() => setSelectedPoi(null)} shifted={leftInset > 0} />
       )}
-      {hover && <BlindSpotTip hover={hover} bounds={bounds} />}
+      {hover && !batchActive && <BlindSpotTip hover={hover} bounds={bounds} />}
+      {batchHover && batchActive && <BatchPointTip hover={batchHover} bounds={bounds} />}
     </div>
   )
 }

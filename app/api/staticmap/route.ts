@@ -110,8 +110,24 @@ export async function GET(request: Request) {
     params.push(['paths', closed.join('|')])
     params.push(['pathStyles', RING_STYLES.slice(0, paths.length).join('|')])
   }
-  const markers = [fmt(center), ...pois.map(fmt)]
-  const markerStyles = [`l,${label},0xc0391d`, ...pois.map(() => 's,,0x1f6e6a')]
+  // 可选：调用方自带的多点标记（街道体检按评级着色）：markers=lng,lat|... markerStyles=s,,0xRRGGBB|...
+  const customMarkers = (q.get('markers') ?? '')
+    .split('|')
+    .filter(Boolean)
+    .map((s) => parsePoint(s))
+    .filter((p): p is LngLat => p != null)
+    .slice(0, MAX_POIS)
+  const customStyles = (q.get('markerStyles') ?? '')
+    .split('|')
+    .filter(Boolean)
+    .map((st) => (/^[sml],[A-Z0-9]?,0x[0-9a-fA-F]{6}$/.test(st) ? st : 's,,0x1f6e6a'))
+  const markers = [fmt(center), ...(customMarkers.length ? customMarkers : pois).map(fmt)]
+  const markerStyles = [
+    `l,${label},0xc0391d`,
+    ...(customMarkers.length
+      ? customMarkers.map((_, i) => customStyles[i] ?? 's,,0x1f6e6a')
+      : pois.map(() => 's,,0x1f6e6a')),
+  ]
   params.push(['markers', markers.join('|')])
   params.push(['markerStyles', markerStyles.join('|')])
   const query = params.map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&')

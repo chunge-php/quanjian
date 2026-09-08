@@ -1,11 +1,29 @@
 'use client'
 import { Icon } from '@/components/Icon'
 import type { SimulateMode } from '@/lib/ui/useSimulateWiring'
+import type { BatchMode } from '@/components/batch/batchTypes'
 
 export type CompareMode = 'off' | 'picking' | 'on'
 
+const BATCH_LABEL: Record<BatchMode, string> = {
+  off: '街道体检',
+  setup: '选范围中…',
+  running: '街道体检中…',
+  done: '街道体检 · 已完成',
+}
+const BATCH_TITLE: Record<BatchMode, string> = {
+  off: '在一条街 / 一片区域里布 9–25 个点逐个体检，汇总成街道级报告',
+  setup: '正在选范围，再点一次退出街道体检',
+  running: '体检进行中，可在左下面板里中止',
+  done: '再点一次回到选范围，可调整范围重跑',
+}
+
 interface Props {
   canPrint: boolean
+  /** 街道体检：单点分析进行中时不可发起 */
+  canBatch: boolean
+  batch: BatchMode
+  onBatch: () => void
   /** 有报告才能发起对比 */
   canCompare: boolean
   compare: CompareMode
@@ -41,6 +59,9 @@ const SIMULATE_TITLE: Record<SimulateMode, string> = {
 /** 顶栏：品牌 + 工具按钮（贴右上，宽度自适应，不占满一行，让地图露出来） */
 export default function TopBar({
   canPrint,
+  canBatch,
+  batch,
+  onBatch,
   canCompare,
   compare,
   onCompare,
@@ -55,6 +76,7 @@ export default function TopBar({
 }: Props) {
   const compareActive = compare !== 'off'
   const simActive = simulate !== 'off'
+  const batchActive = batch !== 'off'
   return (
     <>
       <div
@@ -72,12 +94,26 @@ export default function TopBar({
           </span>
           <span
             className={`ml-3 border-l border-[var(--line-strong)] pl-3 text-xs text-[var(--ink-2)] ${
-              compareActive || simActive ? 'hidden 2xl:inline' : ''
+              compareActive || simActive || batchActive ? 'hidden 2xl:inline' : ''
             }`}
           >
             15 分钟生活圈体检
           </span>
         </div>
+        <button
+          type="button"
+          className={`pointer-events-auto btn ${batchActive ? 'btn-primary' : ''} ${
+            batch === 'setup' ? 'ring-2 ring-[var(--teal)] ring-offset-1' : ''
+          }`}
+          onClick={onBatch}
+          disabled={!canBatch && !batchActive}
+          aria-pressed={batchActive}
+          title={canBatch || batchActive ? BATCH_TITLE[batch] : '单点分析完成后可发起街道体检'}
+          data-testid="topbar-batch"
+        >
+          <Icon name="locate" size={16} />
+          {BATCH_LABEL[batch]}
+        </button>
         <button
           type="button"
           className={`pointer-events-auto btn ${compareActive ? 'btn-primary' : ''}`}
