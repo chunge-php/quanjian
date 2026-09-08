@@ -25,20 +25,21 @@ if not exist node_modules\next\dist\bin\next (
   echo ==^> node_modules 不完整，强制重装
   call pnpm install --force || exit /b 1
 )
-if exist .next\standalone rmdir /s /q .next\standalone
+REM ⚠ 不能用 rmdir /s：standalone 里有 pnpm 的 junction 指向项目 node_modules，rmdir 会钻进去把真依赖删光
+if exist .next\standalone node -e "require('fs').rmSync('.next/standalone',{recursive:true,force:true})"
 call pnpm build || exit /b 1
 if not exist .next\standalone\server.js ( echo 构建没产出 .next\standalone\server.js（next.config 的 output: 'standalone' 丢了？） & exit /b 1 )
 
 echo ==^> 组装 !NAME!
 if not exist dist mkdir dist
-if exist "!STAGE!" rmdir /s /q "!STAGE!"
+if exist "!STAGE!" node -e "require('fs').rmSync(process.argv[1],{recursive:true,force:true})" "!STAGE!"
 mkdir "!STAGE!"
 xcopy /e /i /q /y .next\standalone "!STAGE!" >nul
 mkdir "!STAGE!\.next\static"
 xcopy /e /i /q /y .next\static "!STAGE!\.next\static" >nul
 xcopy /e /i /q /y public "!STAGE!\public" >nul
 REM 只带样例；磁盘缓存由 install.sh 软链到 shared/
-if exist "!STAGE!\data" rmdir /s /q "!STAGE!\data"
+if exist "!STAGE!\data" node -e "require('fs').rmSync(process.argv[1],{recursive:true,force:true})" "!STAGE!\data"
 mkdir "!STAGE!\data\samples"
 xcopy /e /i /q /y data\samples "!STAGE!\data\samples" >nul
 REM 运行配置由 install.sh 在服务器上生成，包里绝不带 AK
@@ -64,7 +65,7 @@ if defined SEVENZIP (
 ) else (
   powershell -NoProfile -Command "Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem; $z=[IO.Compression.ZipFile]::Open('%CD%\dist\!NAME!.zip','Create'); $b='%CD%\dist\'; Get-ChildItem -Recurse -File '%CD%\!STAGE!' | ForEach-Object { [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($z, $_.FullName, $_.FullName.Substring($b.Length).Replace('\','/'), 'Optimal') | Out-Null }; $z.Dispose()" || exit /b 1
 )
-rmdir /s /q "!STAGE!"
+node -e "require('fs').rmSync(process.argv[1],{recursive:true,force:true})" "!STAGE!"
 REM install.sh 放 zip 旁边（不进包），强制 LF
 powershell -NoProfile -Command "[IO.File]::WriteAllText('%CD%\dist\install.sh', ([IO.File]::ReadAllText('%CD%\deploy\install.sh') -replace ([char]13+[char]10), [char]10), (New-Object Text.UTF8Encoding $false))" || exit /b 1
 node -e "const f='package.json';const p=require('./'+f);p.version='!VER!';require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
