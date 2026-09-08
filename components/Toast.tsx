@@ -14,7 +14,7 @@ export default function Toast() {
   if (items.length === 0) return null
   return (
     <div
-      className="toast-root no-print pointer-events-none fixed inset-x-3 top-[7.25rem] z-[var(--z-toast)] flex flex-col items-center gap-2 md:inset-x-auto md:left-1/2 md:top-[4.25rem] md:-translate-x-1/2"
+      className="toast-root no-print pointer-events-none fixed inset-x-3 top-[3.75rem] z-[var(--z-toast)] flex flex-col items-center gap-2 md:inset-x-auto md:left-1/2 md:top-[4.25rem] md:-translate-x-1/2"
       role="status"
       aria-live="polite"
     >

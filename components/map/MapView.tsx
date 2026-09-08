@@ -1,6 +1,7 @@
 'use client'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { BlindSpotCell, FacilityCategory, Isochrone, LngLat, Poi } from '@/lib/types'
+import { ESSENTIAL_CATEGORIES } from '@/lib/categories'
 import type { Slot } from '@/lib/ui/compare'
 import type { VirtualFacility } from '@/lib/ui/simulate'
 import {
@@ -107,7 +108,12 @@ export default function MapView(props: MapViewProps) {
   const batchRef = useRef(batch)
   batchRef.current = batch
   const [bounds, setBounds] = useState({ w: 0, h: 0 })
-  const [filter, setFilter] = useState<LayerFilter>(DEFAULT_FILTER)
+  // 手机小屏默认只看硬指标（349 个设施全画会糊成一团），图例里随时可切回「全部」
+  const [filter, setFilter] = useState<LayerFilter>(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+      ? { ...DEFAULT_FILTER, categories: [...ESSENTIAL_CATEGORIES] }
+      : DEFAULT_FILTER
+  )
   const visiblePois = useMemo(() => applyPoiFilter(pois, filter), [pois, filter])
   const counts = useMemo(() => countByCategory(pois), [pois])
   const centerChangeRef = useRef(onCenterChange)
