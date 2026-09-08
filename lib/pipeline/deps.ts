@@ -32,6 +32,19 @@ export type OverallResult = Pick<
 >
 
 /** 流水线全部外部依赖 */
+/** 联想候选（与 lib/baidu SuggestionItem 字段一致，这里独立声明避免层间强耦合） */
+export interface SuggestItem {
+  uid: string
+  name: string
+  address: string
+  location: LngLat
+  province?: string
+  city?: string
+  district?: string
+  town?: string
+  tag?: string
+}
+
 export interface PipelineDeps {
   /** 是否配置了服务端 AK；false 时直接走样例回放 */
   hasAk: boolean
@@ -42,6 +55,8 @@ export interface PipelineDeps {
 
   /** 地址 → 坐标；找不到返回 null，网络/AK 错误抛异常 */
   geocode(address: string): Promise<{ location: LngLat } | null>
+  /** 地点联想（可选）：关键词 → 候选列表 */
+  suggest?(query: string, region?: string): Promise<SuggestItem[]>
   /** 坐标 → 行政区地址 */
   reverseGeocode(p: LngLat): Promise<HealthReport['address']>
   /** 生成等时圈采样点 */
@@ -101,6 +116,7 @@ export async function defaultDeps(opts: { noCache?: boolean } = {}): Promise<Pip
     hasAk: hasServerAk(),
     allowSampleFallback: envBool(process.env.ALLOW_SAMPLE_FALLBACK),
     geocode: (address) => client.geocode(address),
+    suggest: (q, region) => client.placeSuggestion(q, region),
     reverseGeocode: (p) => client.reverseGeocode(p),
     buildSamples: (center, o) => iso.buildSamples(center, o),
     attachWalkTimes: (origin, points) => baidu.attachWalkTimes(client, origin, points),

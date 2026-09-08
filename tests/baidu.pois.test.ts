@@ -37,6 +37,9 @@ function fakeClient(
     async reverseGeocode() {
       return { formatted: '' }
     },
+    async placeSuggestion() {
+      return []
+    },
     async placeSearchNearby({ query }) {
       stats.placeSearch += 1
       const out: BaiduPlaceResult[] = []

@@ -94,6 +94,19 @@ export interface PlaceSearchNearbyParams {
   maxPages?: number
 }
 
+/** 地点联想候选 */
+export interface SuggestionItem {
+  uid: string
+  name: string
+  address: string
+  location: LngLat
+  province?: string
+  city?: string
+  district?: string
+  town?: string
+  tag?: string
+}
+
 export interface BaiduClient {
   /** 是否配置了 AK（无 AK 时调用会抛 BaiduConfigError） */
   readonly hasAk: boolean
@@ -103,6 +116,8 @@ export interface BaiduClient {
   reverseGeocode(p: LngLat): Promise<HealthReport['address']>
   /** 周边地点检索，自动翻页，返回原始 POI 数组 */
   placeSearchNearby(params: PlaceSearchNearbyParams): Promise<BaiduPlaceResult[]>
+  /** 地点输入提示（联想）：关键词 → 候选地点列表（只返回带坐标的） */
+  placeSuggestion(query: string, region?: string): Promise<SuggestionItem[]>
   /**
    * 批量步行算路：返回 [origin][destination] 矩阵；自动按 100 对分批 + 并发 + 合并；
    * 单元失败为 null，不抛（只有缺 AK 时抛 BaiduConfigError）
@@ -257,6 +272,33 @@ export function createBaiduClient(opts: BaiduClientOptions = {}): BaiduClient {
         district: pick(ac.district),
         street: pick(ac.street) ?? pick(ac.town),
       }
+    },
+
+    async placeSuggestion(query, region = '全国') {
+      stats.placeSearch += 1
+      const data = await request('/place/v2/suggestion', {
+        query,
+        region,
+        city_limit: 'false',
+      })
+      const list = Array.isArray(data.result) ? (data.result as Json[]) : []
+      const out: SuggestionItem[] = []
+      for (const it of list) {
+        const location = fromBaiduLocation(it.location)
+        if (!location) continue
+        out.push({
+          uid: String(it.uid ?? ''),
+          name: String(it.name ?? ''),
+          address: String(it.address ?? ''),
+          location,
+          province: it.province ? String(it.province) : undefined,
+          city: it.city ? String(it.city) : undefined,
+          district: it.district ? String(it.district) : undefined,
+          town: it.town ? String(it.town) : undefined,
+          tag: it.tag ? String(it.tag) : undefined,
+        })
+      }
+      return out
     },
 
     async placeSearchNearby({ query, location, radius, tag, pageSize, maxPages }) {

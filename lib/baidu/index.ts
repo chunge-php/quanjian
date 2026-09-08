@@ -18,6 +18,7 @@ export type {
   GeocodeResult,
   PlaceSearchNearbyParams,
   RouteMatrixCell,
+  SuggestionItem,
 } from './client'
 export { BaiduApiError, BaiduConfigError, BaiduNetworkError, isRetryableError } from './errors'
 export { createLimiter, withRetry } from './limiter'

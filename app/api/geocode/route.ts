@@ -1,5 +1,5 @@
 /**
- * GET /api/geocode?address=  → { ok, location, address }  供搜索框用
+ * GET /api/geocode?address=  → { ok, location, address }  供搜索框回车直搜用（地理编码 → 联想兜底）
  */
 import { NextResponse } from 'next/server'
 import { defaultDeps, hasServerAk } from '@/lib/pipeline/deps'
@@ -20,7 +20,12 @@ export async function GET(request: Request) {
     )
   try {
     const deps = await defaultDeps()
-    const r = await deps.geocode(address)
+    let r = await deps.geocode(address)
+    // 地理编码只认"地址"；小区名 / 单位名 / 商圈名走地点联想兜底，取第一个带坐标的候选
+    if (!r && deps.suggest) {
+      const items = await deps.suggest(address).catch(() => [])
+      if (items[0]) r = { location: items[0].location }
+    }
     if (!r)
       return NextResponse.json({ ok: false, error: `无法识别地址「${address}」` }, { status: 404 })
     let formatted = address

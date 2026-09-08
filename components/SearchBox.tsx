@@ -4,6 +4,8 @@ import type { LngLat } from '@/lib/types'
 import { Icon } from '@/components/Icon'
 import { toast } from '@/lib/ui/toast'
 import { MOCK_CENTER } from '@/lib/ui/mockReport'
+import { useSuggest, type SuggestItem } from '@/lib/ui/useSuggest'
+import SuggestList from '@/components/SuggestList'
 
 export interface SampleItem {
   slug: string
@@ -24,16 +26,50 @@ const MOCK_SAMPLES: SampleItem[] = [
 interface Props {
   busy: boolean
   mock: boolean
+  /** 联想偏向的城市（当前报告所在城市），同城候选排前 */
+  region?: string
   onPick: (center: LngLat, label: string) => void
 }
 
 /** 左上搜索：地址 → /api/geocode；或从内置样例挑一个；或直接点地图 */
-export default function SearchBox({ busy, mock, onPick }: Props) {
+export default function SearchBox({ busy, mock, region, onPick }: Props) {
   const [q, setQ] = useState('')
   const [geocoding, setGeocoding] = useState(false)
   const [samples, setSamples] = useState<SampleItem[]>(mock ? MOCK_SAMPLES : [])
   const [samplesOpen, setSamplesOpen] = useState(false)
+  const [focused, setFocused] = useState(false)
+  const [active, setActive] = useState(-1)
+  const [picked, setPicked] = useState('') // 已点选候选后的文本，避免再次触发联想
   const wrapRef = useRef<HTMLDivElement>(null)
+  const suggest = useSuggest(q === picked ? '' : q, !mock && focused, region)
+  const showSuggest = focused && suggest.items.length > 0
+
+  const pickSuggest = (it: SuggestItem) => {
+    const label =
+      it.district && !it.name.includes(it.district) ? `${it.district} · ${it.name}` : it.name
+    setQ(it.name)
+    setPicked(it.name)
+    setActive(-1)
+    suggest.clear()
+    setFocused(false)
+    onPick(it.location, label)
+  }
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggest) return
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setActive((i) => (i + 1) % suggest.items.length)
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setActive((i) => (i <= 0 ? suggest.items.length - 1 : i - 1))
+    } else if (e.key === 'Enter' && active >= 0) {
+      e.preventDefault()
+      pickSuggest(suggest.items[active])
+    } else if (e.key === 'Escape') {
+      setFocused(false)
+    }
+  }
 
   useEffect(() => {
     if (mock) {
@@ -52,9 +88,12 @@ export default function SearchBox({ busy, mock, onPick }: Props) {
   }, [mock])
 
   useEffect(() => {
-    if (!samplesOpen) return
+    if (!samplesOpen && !focused) return
     const onDoc = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) setSamplesOpen(false)
+      if (!wrapRef.current?.contains(e.target as Node)) {
+        setSamplesOpen(false)
+        setFocused(false)
+      }
     }
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setSamplesOpen(false)
     document.addEventListener('mousedown', onDoc)
@@ -63,12 +102,17 @@ export default function SearchBox({ busy, mock, onPick }: Props) {
       document.removeEventListener('mousedown', onDoc)
       document.removeEventListener('keydown', onKey)
     }
-  }, [samplesOpen])
+  }, [samplesOpen, focused])
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     const address = q.trim()
     if (!address) return
+    if (showSuggest && active >= 0) {
+      pickSuggest(suggest.items[active])
+      return
+    }
+    setFocused(false)
     if (mock) {
       onPick(MOCK_CENTER, address)
       toast('样例模式：地址不做真实地理编码，已使用璧山样例坐标', 'info')
@@ -110,10 +154,20 @@ export default function SearchBox({ busy, mock, onPick }: Props) {
           className="input !border-0 !shadow-none"
           placeholder="输入地址 / 小区名，或直接在地图上点一下"
           value={q}
-          onChange={(e) => setQ(e.target.value)}
+          onChange={(e) => {
+            setQ(e.target.value)
+            setActive(-1)
+            setFocused(true)
+          }}
+          onFocus={() => setFocused(true)}
+          onKeyDown={onKeyDown}
           maxLength={80}
           autoComplete="off"
           enterKeyHint="search"
+          role="combobox"
+          aria-expanded={showSuggest}
+          aria-controls="addr-suggest"
+          aria-autocomplete="list"
         />
         <button
           type="submit"
@@ -139,6 +193,14 @@ export default function SearchBox({ busy, mock, onPick }: Props) {
           />
         </button>
       </form>
+      {showSuggest && !samplesOpen && (
+        <SuggestList
+          items={suggest.items}
+          active={active}
+          onHover={setActive}
+          onPick={pickSuggest}
+        />
+      )}
       {samplesOpen && (
         <ul
           className="rise-in mt-1 max-h-72 overflow-auto border border-[var(--ink)] bg-[var(--paper)] py-1 scroll-thin"

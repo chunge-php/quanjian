@@ -137,7 +137,12 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
         onStatus={onMapStatus}
       />
 
-      <SearchBox busy={running} mock={mock} onPick={analyze} />
+      <SearchBox
+        busy={running}
+        mock={mock}
+        region={state.report?.address.city || '重庆市'}
+        onPick={analyze}
+      />
       <TopBar
         canPrint={!!state.report}
         showSamples={showSamples}
