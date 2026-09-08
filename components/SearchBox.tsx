@@ -57,7 +57,8 @@ export default function SearchBox({
   const [picked, setPicked] = useState('') // 已点选候选后的文本，避免再次触发联想
   const [composing, setComposing] = useState(false) // 中文输入法组合中（拼音未上屏）
   const wrapRef = useRef<HTMLDivElement>(null)
-  const suggest = useSuggest(q === picked || composing ? '' : q, !mock && focused, region)
+  // 联想不受 mock 影响：后端真不可用时请求会失败、列表为空，不需要提前禁用
+  const suggest = useSuggest(q === picked || composing ? '' : q, focused, region)
   const showSuggest = focused && (suggest.items.length > 0 || suggest.loading)
 
   const pickSuggest = (it: SuggestItem) => {

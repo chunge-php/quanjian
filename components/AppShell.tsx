@@ -60,8 +60,9 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
   })
 
   useEffect(() => {
-    if (backendDown) setMock(true)
-  }, [backendDown])
+    if (forceMock) return
+    setMock(backendDown)
+  }, [backendDown, forceMock])
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)')
