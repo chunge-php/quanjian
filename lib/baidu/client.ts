@@ -169,11 +169,34 @@ function envNum(name: string, fallback: number): number {
 }
 
 /**
- * 创建客户端。AK 缺省读 process.env.BAIDU_SERVER_AK；
+ * 创建客户端。AK 缺省读 process.env.BAIDU_SERVER_AK（可逗号分隔多个，前一个天配额用尽自动切下一个）；
  * qps/concurrency 缺省读 BAIDU_QPS / BAIDU_MAX_CONCURRENCY，再缺省用实测默认值。
  */
+/** 天配额超限 / 无权限类错误：换下一个 AK 重试（BAIDU_SERVER_AK 可用逗号配多个） */
+const QUOTA_STATUS = new Set([302, 4, 5])
+/** 进程级"今天已用尽"的 AK（按日期分桶，过零点自动失效） */
+const exhausted = new Map<string, string>() // ak -> yyyy-mm-dd
+const today = () => new Date().toISOString().slice(0, 10)
+
 export function createBaiduClient(opts: BaiduClientOptions = {}): BaiduClient {
-  const ak = (opts.ak ?? process.env.BAIDU_SERVER_AK ?? '').trim()
+  const aks = (opts.ak ?? process.env.BAIDU_SERVER_AK ?? '')
+    .split(/[,\s]+/)
+    .map((x) => x.trim())
+    .filter(Boolean)
+  let akIndex = Math.max(
+    0,
+    aks.findIndex((a) => exhausted.get(a) !== today())
+  )
+  const ak = aks[akIndex] ?? ''
+  const currentAk = () => aks[akIndex] ?? ''
+  /** 当前 AK 配额用尽：标记并切到下一个可用 AK；没有可切的返回 false */
+  const rotateAk = (): boolean => {
+    exhausted.set(currentAk(), today())
+    const next = aks.findIndex((a, i) => i !== akIndex && exhausted.get(a) !== today())
+    if (next < 0) return false
+    akIndex = next
+    return true
+  }
   const fetchImpl = opts.fetchImpl ?? globalThis.fetch
   const limiter: Limiter = createLimiter({
     qps: opts.qps ?? envNum('BAIDU_QPS', DEFAULT_QPS),
@@ -190,7 +213,7 @@ export function createBaiduClient(opts: BaiduClientOptions = {}): BaiduClient {
     for (const [k, v] of Object.entries(params))
       if (v !== undefined && v !== '') u.searchParams.set(k, String(v))
     u.searchParams.set('output', 'json')
-    u.searchParams.set('ak', ak)
+    u.searchParams.set('ak', currentAk())
     return u.toString()
   }
 
@@ -229,14 +252,25 @@ export function createBaiduClient(opts: BaiduClientOptions = {}): BaiduClient {
     }
     const t0 = Date.now()
     try {
-      const data = await withRetry(() => limiter.schedule(() => fetchJson(endpoint, url)), {
-        retries: opts.retries ?? 3,
-        baseDelayMs: opts.retryBaseMs ?? 500,
-        shouldRetry: isRetryableError,
-        onRetry: () => {
-          stats.rateLimited += 1
-        },
-      })
+      const once = (u: string) =>
+        withRetry(() => limiter.schedule(() => fetchJson(endpoint, u)), {
+          retries: opts.retries ?? 3,
+          baseDelayMs: opts.retryBaseMs ?? 500,
+          shouldRetry: isRetryableError,
+          onRetry: () => {
+            stats.rateLimited += 1
+          },
+        })
+      let data: Json
+      try {
+        data = await once(url)
+      } catch (e) {
+        // 天配额超限：换备用 AK 再来一次（URL 重建，缓存 key 不含 AK 所以不变）
+        if (e instanceof BaiduApiError && QUOTA_STATUS.has(e.status) && rotateAk()) {
+          console.warn(`[baidu] ${endpoint} ${e.message} → 切换到备用 AK #${akIndex + 1}`)
+          data = await once(buildUrl(endpoint, params))
+        } else throw e
+      }
       await cache.set(key, data)
       return data
     } finally {

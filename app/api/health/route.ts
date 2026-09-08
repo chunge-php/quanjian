@@ -22,7 +22,11 @@ export async function GET(request: Request) {
   let probe: Record<string, unknown> | undefined
   if (deep) {
     const ak = process.env.BAIDU_SERVER_AK ?? ''
-    probe = { akPrefix: ak ? `${ak.slice(0, 6)}…（${ak.length} 位）` : '未配置' }
+    const list = ak.split(/[,\s]+/).filter(Boolean)
+    probe = {
+      akCount: list.length,
+      akPrefix: list.length ? list.map((a) => `${a.slice(0, 6)}…`).join(', ') : '未配置',
+    }
     if (ak) {
       try {
         const { createBaiduClient } = await import('@/lib/baidu')
