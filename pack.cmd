@@ -24,7 +24,16 @@ copy /y deploy\start.sh dist\pkg\start.sh >nul
 copy /y deploy\ecosystem.config.cjs dist\pkg\ecosystem.config.cjs >nul
 copy /y deploy\服务器部署.md dist\pkg\服务器部署.md >nul
 if exist dist\quanjian-%VER%.zip del /q dist\quanjian-%VER%.zip
-powershell -NoProfile -Command "Compress-Archive -Path 'dist\pkg\*' -DestinationPath 'dist\quanjian-%VER%.zip' -Force"
+REM 优先用 7-Zip（几秒），没有再退回 PowerShell Compress-Archive（几分钟）
+set SEVENZIP=
+if exist "%ProgramFiles%\7-Zip\7z.exe" set "SEVENZIP=%ProgramFiles%\7-Zip\7z.exe"
+if exist "%ProgramFiles(x86)%\7-Zip\7z.exe" set "SEVENZIP=%ProgramFiles(x86)%\7-Zip\7z.exe"
+where 7z >nul 2>nul && set "SEVENZIP=7z"
+if defined SEVENZIP (
+  "%SEVENZIP%" a -tzip -mx=5 -r "dist\quanjian-%VER%.zip" ".\dist\pkg\*" >nul
+) else (
+  powershell -NoProfile -Command "Compress-Archive -Path 'dist\pkg\*' -DestinationPath 'dist\quanjian-%VER%.zip' -Force"
+)
 rmdir /s /q dist\pkg
 echo ==^> 完成: dist\quanjian-%VER%.zip
 endlocal
