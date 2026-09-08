@@ -374,3 +374,8 @@ aside[aria-label='体检报告'] .card {
   border-radius: var(--r-md);
   overflow: hidden;
 }
+
+/* 打印专用内容：屏幕上隐藏，PDF 里展开（见 print.css） */
+.print-only {
+  display: none;
+}
