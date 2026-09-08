@@ -1,0 +1,4 @@
+node_modules
+.next
+data/samples/*.json
+pnpm-lock.yaml
