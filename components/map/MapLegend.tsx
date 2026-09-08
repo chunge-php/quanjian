@@ -19,6 +19,8 @@ interface Props {
   showSamples: boolean
   onToggleSamples: () => void
   rightInset: number
+  /** 移动端底部抽屉当前占用高度（px），图例贴在抽屉上方不被盖住 */
+  bottomInset?: number
   filter: LayerFilter
   counts: Record<FacilityCategory, { inIso: number; total: number }>
   onToggleCategory: (key: FacilityCategory) => void
@@ -32,15 +34,22 @@ interface Props {
  * 每一行都能点：类别单击 = 只看这一类，再点其他类可多选；等时圈 / 盲区两层可整体开关。
  */
 export default function MapLegend(p: Props) {
-  const [open, setOpen] = useState(true)
+  // 手机默认收起（展开会占满地图区），桌面默认展开
+  const [open, setOpen] = useState(
+    () => !(typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches)
+  )
   const allOn = p.filter.categories === null
   const essentialOn = isOnlyEssential(p.filter)
   const filtering = !allOn || p.filter.onlyInIsochrone
 
   return (
     <div
-      className="map-ui no-print absolute bottom-4 left-3 z-[var(--z-map-ui)] md:left-auto"
-      style={{ right: p.rightInset ? p.rightInset + 16 : undefined }}
+      className="map-ui no-print absolute left-3 z-[var(--z-map-ui)] md:left-auto"
+      style={{
+        right: p.rightInset ? p.rightInset + 16 : undefined,
+        // 手机：抽屉顶边之上 12px；桌面：固定 16px（抽屉在右侧不遮）
+        bottom: p.bottomInset ? p.bottomInset + 12 : 16,
+      }}
     >
       <button
         type="button"
@@ -60,7 +69,7 @@ export default function MapLegend(p: Props) {
       {open && (
         <div
           id="map-legend"
-          className="panel rise-in mt-1 w-[19rem] border border-[var(--line-strong)] bg-[var(--paper)] px-3.5 py-3 text-[0.8125rem] leading-5"
+          className="panel rise-in mt-1 max-h-[32vh] w-[19rem] overflow-auto md:max-h-none scroll-thin border border-[var(--line-strong)] bg-[var(--paper)] px-3.5 py-3 text-[0.8125rem] leading-5"
         >
           {p.batch ? (
             <BatchLegend />

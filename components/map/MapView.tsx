@@ -303,6 +303,7 @@ export default function MapView(props: MapViewProps) {
       )}
       {status === 'ready' && (
         <MapLegend
+          bottomInset={bottomInset}
           hasBlindSpots={!!blindSpots && blindSpots.length > 0}
           hasPois={!!pois && pois.length > 0}
           hasIsochrone={!!focusIsochrone}
