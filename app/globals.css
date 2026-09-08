@@ -51,6 +51,13 @@
 
   --drawer-w: 400px;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* 圆角（用户点名要圆润：面板/按钮/输入框统一用这几档） */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-pill: 999px;
+  --shadow-panel: 0 6px 24px rgba(35, 38, 31, 0.14);
 }
 
 html,
@@ -173,6 +180,7 @@ input {
   display: inline-block;
   transform: rotate(-6deg);
   border: 2px solid currentColor;
+  border-radius: 6px;
   padding: 0.05em 0.35em;
   box-shadow:
     inset 0 0 0 2px var(--paper),
@@ -192,6 +200,7 @@ input {
   min-height: 2.5rem;
   padding: 0 0.9rem;
   border: 1px solid var(--ink);
+  border-radius: var(--r-sm);
   background: var(--paper);
   color: var(--ink);
   font-size: 0.875rem;
@@ -241,6 +250,7 @@ input {
   padding: 0 0.75rem;
   background: var(--paper);
   border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
   color: var(--ink);
   font-size: 0.9375rem;
 }
@@ -324,4 +334,43 @@ input {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* 面板圆角与投影：地图上的浮层（搜索/图例/顶栏/进度/POI 卡/联想列表/toast） */
+.panel {
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+}
+.panel-lg {
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+}
+/* 搜索框组：整体圆角，内部按钮方角拼接 */
+form[role='search'] .btn,
+form[role='search'] .input {
+  border-radius: 0;
+}
+/* 报告抽屉：桌面端左侧两角圆 */
+@media (min-width: 768px) {
+  aside[aria-label='体检报告'] {
+    border-top-left-radius: var(--r-lg);
+    border-bottom-left-radius: var(--r-lg);
+    overflow: hidden;
+  }
+}
+/* 移动端底部抽屉：顶部两角圆 */
+@media (max-width: 767px) {
+  aside[aria-label='体检报告'] {
+    border-top-left-radius: var(--r-lg);
+    border-top-right-radius: var(--r-lg);
+    overflow: hidden;
+  }
+}
+/* 抽屉里的小卡片、图签表格 */
+aside[aria-label='体检报告'] table,
+aside[aria-label='体检报告'] .card {
+  border-radius: var(--r-md);
+  overflow: hidden;
 }

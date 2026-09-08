@@ -21,7 +21,7 @@ export default function Toast() {
       {items.map((t) => (
         <div
           key={t.id}
-          className={`rise-in pointer-events-auto flex max-w-[26rem] items-start gap-3 border border-[var(--line-strong)] border-l-[3px] bg-[var(--paper)] py-2.5 pl-3 pr-2 text-sm text-[var(--ink)] shadow-[0_2px_0_var(--line)] ${KIND_STYLE[t.kind]}`}
+          className={`panel rise-in pointer-events-auto flex max-w-[26rem] items-start gap-3 border border-[var(--line-strong)] border-l-[3px] bg-[var(--paper)] py-2.5 pl-3 pr-2 text-sm text-[var(--ink)] shadow-[0_2px_0_var(--line)] ${KIND_STYLE[t.kind]}`}
         >
           <p className="min-w-0 flex-1 break-words leading-snug">{t.text}</p>
           <button

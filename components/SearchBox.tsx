@@ -143,7 +143,7 @@ export default function SearchBox({ busy, mock, region, onPick }: Props) {
     >
       <form
         onSubmit={submit}
-        className="flex border border-[var(--ink)] bg-[var(--paper)]"
+        className="panel flex border border-[var(--ink)] bg-[var(--paper)]"
         role="search"
       >
         <label htmlFor="addr" className="sr-only">
@@ -203,7 +203,7 @@ export default function SearchBox({ busy, mock, region, onPick }: Props) {
       )}
       {samplesOpen && (
         <ul
-          className="rise-in mt-1 max-h-72 overflow-auto border border-[var(--ink)] bg-[var(--paper)] py-1 scroll-thin"
+          className="panel rise-in mt-1 max-h-72 overflow-auto border border-[var(--line-strong)] bg-[var(--paper)] py-1 scroll-thin"
           role="listbox"
           aria-label="内置样例"
         >

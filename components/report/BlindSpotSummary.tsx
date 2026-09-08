@@ -41,7 +41,7 @@ export default function BlindSpotSummary({ cells }: { cells: BlindSpotCell[] }) 
           {ranked.map(([cat, n]) => (
             <li key={cat} className="flex items-center gap-2 text-sm">
               <span className="w-14 shrink-0 text-[var(--ink-2)]">{CATEGORY_LABEL[cat]}</span>
-              <span className="h-2.5 flex-1 bg-[var(--paper-3)]">
+              <span className="h-2.5 flex-1 overflow-hidden rounded-full bg-[var(--paper-3)]">
                 <span
                   className="block h-full bg-[var(--vermilion)]"
                   style={{

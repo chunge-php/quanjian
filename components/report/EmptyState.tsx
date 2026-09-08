@@ -81,7 +81,7 @@ function Step({
   return (
     <li className="flex gap-3">
       <span className="figure mt-0.5 w-4 shrink-0 text-xs text-[var(--ink-3)]">{no}</span>
-      <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center border border-[var(--ink)] text-[var(--ink)]">
+      <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--ink)] text-[var(--ink)]">
         <Icon name={icon} size={14} />
       </span>
       <div className="min-w-0">

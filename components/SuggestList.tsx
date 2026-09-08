@@ -15,7 +15,7 @@ export default function SuggestList({ items, active, onHover, onPick }: Props) {
   return (
     <ul
       id="addr-suggest"
-      className="rise-in mt-1 max-h-80 overflow-auto border border-[var(--ink)] bg-[var(--paper)] py-1 scroll-thin"
+      className="panel rise-in mt-1 max-h-80 overflow-auto border border-[var(--line-strong)] bg-[var(--paper)] py-1 scroll-thin"
       role="listbox"
       aria-label="地点联想"
     >

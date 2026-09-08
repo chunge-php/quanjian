@@ -29,7 +29,7 @@ export default function TopBar({
         className="map-ui no-print pointer-events-none absolute top-3 z-[var(--z-map-ui)] hidden items-stretch gap-2 md:flex"
         style={{ right: rightInset + 12 }}
       >
-        <div className="pointer-events-auto flex items-center border border-[var(--ink)] bg-[var(--paper)] px-3">
+        <div className="panel pointer-events-auto flex items-center border border-[var(--ink)] bg-[var(--paper)] px-3">
           <span
             className="font-serif text-lg font-bold tracking-[0.2em]"
             style={{ fontFamily: 'var(--font-serif)' }}
@@ -40,7 +40,7 @@ export default function TopBar({
             15 分钟生活圈体检
           </span>
         </div>
-        <label className="pointer-events-auto flex cursor-pointer select-none items-center gap-1.5 border border-[var(--line-strong)] bg-[var(--paper)] px-2.5 text-xs text-[var(--ink-2)]">
+        <label className="panel pointer-events-auto flex cursor-pointer select-none items-center gap-1.5 border border-[var(--line-strong)] bg-[var(--paper)] px-2.5 text-xs text-[var(--ink-2)]">
           <input
             type="checkbox"
             className="accent-[var(--teal)]"
@@ -75,7 +75,7 @@ export default function TopBar({
       </div>
       {notice && (
         <div className="map-ui no-print absolute left-3 right-3 top-[3.75rem] z-[var(--z-map-ui)] md:left-4 md:top-[3.9rem] md:w-[26rem]">
-          <p className="flex items-start gap-2 border border-[var(--ochre)] bg-[var(--paper)] px-3 py-2 text-xs text-[var(--ink-2)]">
+          <p className="panel flex items-start gap-2 border border-[var(--ochre)] bg-[var(--paper)] px-3 py-2 text-xs text-[var(--ink-2)]">
             <Icon name="alert" size={14} className="mt-0.5 shrink-0 text-[var(--ochre)]" />
             <span>{notice}</span>
           </p>

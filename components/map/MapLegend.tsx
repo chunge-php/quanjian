@@ -36,7 +36,7 @@ export default function MapLegend({
       {open && (
         <div
           id="map-legend"
-          className="rise-in mt-1 w-[15.5rem] border border-[var(--ink)] bg-[var(--paper)]/95 px-3 py-2.5 text-xs backdrop-blur-[2px]"
+          className="panel rise-in mt-1 w-[16.5rem] border border-[var(--line-strong)] bg-[var(--paper)] px-3.5 py-3 text-[0.8125rem] leading-5"
         >
           <p className="kicker mb-1.5">步行等时圈</p>
           <div className="flex items-center gap-2">
@@ -54,7 +54,7 @@ export default function MapLegend({
                 style={{ background: 'rgba(31,110,106,0.3)' }}
               />
             </span>
-            <span className="figure text-[var(--ink-2)]">15′ · 10′ · 5′</span>
+            <span className="figure text-[var(--ink)]">15′ · 10′ · 5′</span>
           </div>
           {hasBlindSpots && (
             <>
@@ -63,21 +63,21 @@ export default function MapLegend({
                 {[1 / 3, 2 / 3, 1].map((s) => (
                   <span
                     key={s}
-                    className="inline-block h-4 w-6"
-                    style={{ background: blindSpotColor(s), opacity: 0.16 + s * 0.4 }}
+                    className="inline-block h-4 w-6 rounded-[3px]"
+                    style={{ background: blindSpotColor(s), opacity: 0.35 + s * 0.45 }}
                     aria-hidden="true"
                   />
                 ))}
-                <span className="ml-1 text-[var(--ink-2)]">缺 1 → 3 类</span>
+                <span className="ml-1 text-[var(--ink)]">缺 1 → 3 类</span>
               </div>
             </>
           )}
           <p className="kicker mb-1.5 mt-2.5">设施（方块深色 = 硬指标）</p>
           <ul className="grid grid-cols-2 gap-x-2 gap-y-1">
             {FACILITY_CATEGORIES.map((c) => (
-              <li key={c.key} className="flex items-center gap-1.5 text-[var(--ink-2)]">
+              <li key={c.key} className="flex items-center gap-1.5 text-[var(--ink)]">
                 <span
-                  className={`inline-flex h-4 w-4 shrink-0 items-center justify-center border ${
+                  className={`inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border ${
                     c.essential
                       ? 'border-[var(--vermilion)] bg-[var(--ink)] text-[var(--paper)]'
                       : 'border-[var(--ink)] bg-[var(--paper)] text-[var(--ink)]'
@@ -89,9 +89,7 @@ export default function MapLegend({
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-[0.6875rem] text-[var(--ink-3)]">
-            圈外设施淡显；点设施看步行分钟
-          </p>
+          <p className="mt-2 text-xs text-[var(--ink-2)]">圈外设施淡显；点设施看步行分钟</p>
         </div>
       )}
     </div>

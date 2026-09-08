@@ -9,7 +9,7 @@ export default function PoiCard({ poi, onClose }: { poi: Poi; onClose: () => voi
   const min = fmtSecToMin(poi.walkSec)
   const essential = ESSENTIAL_SET.has(poi.category)
   return (
-    <div className="map-ui no-print rise-in absolute left-3 right-3 top-[4.5rem] z-[var(--z-overlay)] border border-[var(--ink)] bg-[var(--paper)] md:left-4 md:right-auto md:top-auto md:bottom-4 md:w-[22rem]">
+    <div className="panel map-ui no-print rise-in absolute left-3 right-3 top-[4.5rem] z-[var(--z-overlay)] border border-[var(--line-strong)] bg-[var(--paper)] md:left-4 md:right-auto md:top-auto md:bottom-4 md:w-[22rem]">
       <div className="flex items-start gap-3 px-3.5 py-3">
         <span
           className={`mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center border ${

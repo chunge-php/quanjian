@@ -35,7 +35,7 @@ export default function ProgressOverlay({ stage, progress, message, onCancel }: 
   const idx = stage ? ORDER.indexOf(stage) : -1
   return (
     <div
-      className="map-ui no-print rise-in absolute bottom-4 left-3 right-3 z-[var(--z-overlay)] border border-[var(--ink)] bg-[var(--paper)] md:left-4 md:right-auto md:w-[22rem]"
+      className="panel map-ui no-print rise-in absolute bottom-4 left-3 right-3 z-[var(--z-overlay)] border border-[var(--line-strong)] bg-[var(--paper)] md:left-4 md:right-auto md:w-[22rem]"
       role="progressbar"
       aria-valuemin={0}
       aria-valuemax={100}
