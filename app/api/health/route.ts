@@ -8,8 +8,18 @@ import { listSamples } from '@/lib/pipeline/sample'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+let lastDeep = 0
+
 export async function GET(request: Request) {
-  const deep = new URL(request.url).searchParams.get('deep') === '1'
+  // ?deep=1 会真调一次付费接口：只允许本机访问（线上经 nginx 代理时 Host 是域名，不会命中），且 10 秒一次
+  const url = new URL(request.url)
+  const host = (request.headers.get('host') ?? '').toLowerCase()
+  const local = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(host)
+  const deepWanted = url.searchParams.get('deep') === '1'
+  if (deepWanted && !local)
+    return NextResponse.json({ ok: false, error: 'deep 探测仅限本机访问' }, { status: 403 })
+  const deep = deepWanted && local && Date.now() - lastDeep > 10_000
+  if (deep) lastDeep = Date.now()
   let sampleCount = 0
   let sampleError: string | undefined
   try {
@@ -23,10 +33,7 @@ export async function GET(request: Request) {
   if (deep) {
     const ak = process.env.BAIDU_SERVER_AK ?? ''
     const list = ak.split(/[,\s]+/).filter(Boolean)
-    probe = {
-      akCount: list.length,
-      akPrefix: list.length ? list.map((a) => `${a.slice(0, 6)}…`).join(', ') : '未配置',
-    }
+    probe = { akCount: list.length }
     if (ak) {
       try {
         const { createBaiduClient } = await import('@/lib/baidu')
