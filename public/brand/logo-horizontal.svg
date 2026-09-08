@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" width="720" height="200">
+<g transform="translate(0,0)"><path d="M100.00,19.34 L130.22,27.04 L153.88,46.12 L164.99,73.08 L159.82,100.00 L158.30,124.15 L152.90,152.90 L132.08,177.45 L100.00,188.00 L71.90,167.83 L64.50,135.50 L53.16,119.40 L33.03,100.00 L30.89,71.37 L48.65,48.65 L71.64,31.53 Z" fill="#1f6e6a" fill-opacity="0.16" stroke="#23261f" stroke-width="3.12" stroke-linejoin="round"/>
+<path d="M100.00,45.43 L120.57,50.33 L137.07,62.93 L145.85,81.01 L144.60,100.00 L142.65,117.67 L136.60,136.60 L121.46,151.82 L100.00,158.08 L80.44,147.21 L71.72,128.28 L62.83,115.40 L51.98,100.00 L52.17,80.19 L64.13,64.13 L80.32,52.48 Z" fill="#1f6e6a" fill-opacity="0.34" stroke="#1f6e6a" stroke-width="1.88" stroke-linejoin="round"/>
+<path d="M100.00,69.80 L111.43,72.41 L120.72,79.28 L125.98,89.24 L126.00,100.00 L124.63,110.20 L120.52,120.52 L111.80,128.49 L100.00,131.68 L89.00,126.55 L82.99,117.01 L77.68,109.25 L72.56,100.00 L73.19,88.89 L79.79,79.79 L88.95,73.32 Z" fill="#1f6e6a" fill-opacity="0.72" stroke="#1f6e6a" stroke-width="1.88" stroke-linejoin="round"/>
+<circle cx="100.0" cy="100.0" r="15.00" fill="#c0391d"/>
+<circle cx="100.0" cy="100.0" r="6.30" fill="#f3ede0"/></g>
+<text x="228" y="112" font-family="'Songti SC','STSong','Noto Serif CJK SC','Noto Serif SC','Source Han Serif SC',serif" font-size="96" font-weight="700" fill="#23261f" letter-spacing="6">圈见</text>
+<text x="232" y="166" font-family="'SF Mono','Menlo','Consolas','Noto Sans Mono CJK SC',ui-monospace,monospace" font-size="22" fill="#1f6e6a" letter-spacing="9">QUANJIAN</text>
+<line x1="232" y1="136" x2="470" y2="136" stroke="#23261f" stroke-width="1.5"/>
+<text x="484" y="114" font-family="'PingFang SC','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="20" fill="#23261f" opacity="0.72">15 分钟生活圈体检</text>
+</svg>

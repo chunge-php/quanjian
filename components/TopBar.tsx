@@ -62,6 +62,8 @@ export default function TopBar({
         style={{ right: rightInset + 12 }}
       >
         <div className="panel pointer-events-auto flex items-center border border-[var(--ink)] bg-[var(--paper)] px-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/logo-mark.svg" alt="" width={22} height={22} className="mr-2" />
           <span
             className="font-serif text-lg font-bold tracking-[0.2em]"
             style={{ fontFamily: 'var(--font-serif)' }}

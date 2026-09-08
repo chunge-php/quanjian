@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+<rect width="1200" height="630" fill="#f3ede0"/>
+<g transform="translate(90,115) scale(1.6)"><path d="M125.00,24.18 L162.78,33.80 L192.35,57.65 L206.23,91.35 L199.78,125.00 L197.87,155.18 L191.12,191.12 L165.10,221.81 L125.00,235.00 L89.88,209.78 L80.63,169.37 L66.45,149.25 L41.29,125.00 L38.61,89.22 L60.81,60.81 L89.55,39.41 Z" fill="#1f6e6a" fill-opacity="0.16" stroke="#23261f" stroke-width="3.91" stroke-linejoin="round"/>
+<path d="M125.00,56.79 L150.72,62.92 L171.34,78.66 L182.32,101.26 L180.75,125.00 L178.31,147.08 L170.76,170.76 L151.83,189.77 L125.00,197.60 L100.56,184.01 L89.65,160.35 L78.54,144.24 L64.98,125.00 L65.22,100.24 L80.17,80.17 L100.40,65.60 Z" fill="#1f6e6a" fill-opacity="0.34" stroke="#1f6e6a" stroke-width="2.34" stroke-linejoin="round"/>
+<path d="M125.00,87.25 L139.28,90.52 L150.90,99.10 L157.47,111.55 L157.50,125.00 L155.79,137.75 L150.65,150.65 L139.75,160.62 L125.00,164.60 L111.25,158.19 L103.73,146.27 L97.10,136.56 L90.70,125.00 L91.49,111.12 L99.74,99.74 L111.19,91.65 Z" fill="#1f6e6a" fill-opacity="0.72" stroke="#1f6e6a" stroke-width="2.34" stroke-linejoin="round"/>
+<circle cx="125.0" cy="125.0" r="18.75" fill="#c0391d"/>
+<circle cx="125.0" cy="125.0" r="7.88" fill="#f3ede0"/></g>
+<text x="560" y="300" font-family="'Songti SC','STSong','Noto Serif CJK SC','Noto Serif SC',serif" font-size="128" font-weight="700" fill="#23261f" letter-spacing="8">圈见</text>
+<line x1="566" y1="330" x2="1080" y2="330" stroke="#23261f" stroke-width="2"/>
+<text x="566" y="384" font-family="'PingFang SC','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="38" fill="#23261f">15 分钟生活圈智能体检与规划</text>
+<text x="566" y="436" font-family="'PingFang SC','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="24" fill="#23261f" opacity="0.7">真实步行路网等时圈 · 十类民生设施 · 服务盲区识别</text>
+<text x="566" y="520" font-family="'SF Mono','Menlo','Consolas',ui-monospace,monospace" font-size="22" fill="#1f6e6a" letter-spacing="6">QUANJIAN · 基于百度地图开放平台 · MIT</text>
+</svg>

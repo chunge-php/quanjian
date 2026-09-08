@@ -1,3 +1,5 @@
+<p align="center"><img src="public/brand/logo-horizontal.png" alt="圈见 QuanJian" width="560"></p>
+
 # 圈见 QuanJian
 
 [![CI](https://github.com/chunge-php/quanjian/actions/workflows/ci.yml/badge.svg)](https://github.com/chunge-php/quanjian/actions/workflows/ci.yml)
