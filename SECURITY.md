@@ -11,7 +11,7 @@
 
 **请不要通过公开 Issue 报告安全问题。**
 
-- 发送邮件至 **yuukitzsche@gmail.com**，标题以 `[quanjian security]` 开头；
+- 发送邮件至 **drq.chunge.php@qq.com**，标题以 `[quanjian security]` 开头；
 - 或使用 GitHub 的 [私密漏洞报告](https://github.com/chunge-php/quanjian/security/advisories/new)。
 
 请包含：受影响版本、复现步骤、影响评估。我们会在 **3 个工作日内**确认收到，**14 天内**给出修复计划或说明；修复发布后在 CHANGELOG 中致谢（如你愿意）。
