@@ -4,12 +4,18 @@ import { STAGE_LABEL } from '@/lib/ui/useAnalyze'
 import { fmtKm2 } from '@/lib/ui/format'
 
 /** 分析进行中：抽屉里显示已到达的中间结果，等时圈先出、设施后出 */
-export default function RunningPanel({ state }: { state: AnalyzeState }) {
+export default function RunningPanel({
+  state,
+  title = '正在体检',
+}: {
+  state: AnalyzeState
+  title?: string
+}) {
   const ring15 = state.isochrone?.rings.find((r) => r.minutes === 15)
   const inCount = state.pois?.filter((p) => p.inIsochrone).length ?? 0
   return (
     <div className="px-5 pb-6 pt-6" aria-live="polite">
-      <p className="kicker">正在体检</p>
+      <p className="kicker">{title}</p>
       <h1 className="mt-1 text-xl font-semibold" style={{ fontFamily: 'var(--font-serif)' }}>
         {state.stage ? STAGE_LABEL[state.stage] : '准备中'}
         <span className="blink">…</span>

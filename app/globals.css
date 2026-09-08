@@ -320,6 +320,12 @@ input {
   filter: saturate(0.42) sepia(0.2) contrast(0.96);
 }
 
+/* 放置模式：十字光标（百度会给内部元素设 grab，一并覆盖） */
+.map-placing,
+.map-placing * {
+  cursor: crosshair !important;
+}
+
 /* 百度地图版权/logo 收敛到角落，不遮盖 UI */
 .anchorBL,
 .BMap_cpyCtrl {

@@ -4,7 +4,15 @@
  */
 import { describe, expect, it } from 'vitest'
 import type { PipelineDeps, WalkTime } from '@/lib/pipeline/deps'
-import type { ApiStats, CategoryScore, Isochrone, IsochroneSample, LngLat, Poi } from '@/lib/types'
+import type {
+  ApiStats,
+  CategoryScore,
+  Isochrone,
+  IsochroneSample,
+  LngLat,
+  Poi,
+  WeatherInfo,
+} from '@/lib/types'
 import { FACILITY_CATEGORIES } from '@/lib/categories'
 
 export const CENTER: LngLat = { lng: 106.2277, lat: 29.5921 }
@@ -24,6 +32,12 @@ export interface StubFaults {
   blindspotThrows?: boolean
   overallThrows?: boolean
   perCategory?: boolean
+  /** 天气：抛错 */
+  weatherThrows?: boolean
+  /** 天气：延迟多少毫秒才返回（模拟慢接口） */
+  weatherDelayMs?: number
+  /** 天气：不提供 weather 依赖（缺省提供） */
+  noWeather?: boolean
 }
 
 function offset(c: LngLat, dxM: number, dyM: number): LngLat {
@@ -78,6 +92,20 @@ export function stubPois(center: LngLat): Poi[] {
       inIsochrone: false,
     }
   })
+}
+
+/** 固定天气样本 */
+export const STUB_WEATHER: WeatherInfo = {
+  text: '多云',
+  tempC: 22,
+  feelsLikeC: 24,
+  humidity: 60,
+  windDir: '东北风',
+  windClass: '2 级',
+  uptime: '2026-09-08 13:55',
+  fetchedAt: '2026-09-08T05:55:00.000Z',
+  forecast: [{ date: '2026-09-08', week: '星期二', high: 26, low: 18, text: '多云' }],
+  walkComment: '气温适宜，适合步行',
 }
 
 /** 构造 stub deps；调用记录在 calls 里 */
@@ -232,6 +260,14 @@ export function makeStubDeps(faults: StubFaults = {}, over: Partial<PipelineDeps
       }
     },
     ...over,
+  }
+  if (!faults.noWeather && !over.weather) {
+    deps.weather = async () => {
+      calls.push('weather')
+      if (faults.weatherThrows) throw new Error('weather 接口异常')
+      if (faults.weatherDelayMs) await new Promise((r) => setTimeout(r, faults.weatherDelayMs))
+      return { ...STUB_WEATHER }
+    }
   }
   if (faults.perCategory) {
     deps.searchCategory = async (center, _r, category) => {

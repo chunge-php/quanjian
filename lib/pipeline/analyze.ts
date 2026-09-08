@@ -17,6 +17,7 @@ import type {
   IsochroneSample,
   LngLat,
   Poi,
+  WeatherInfo,
 } from '@/lib/types'
 import type { OverallResult, PipelineDeps } from './deps'
 import { defaultSamplesDir, findNearestSample, replaySample } from './sample'
@@ -33,6 +34,8 @@ import {
 export const POI_SEARCH_RADIUS_M = 1800
 /** 默认方向数 */
 export const DEFAULT_BEARINGS = 16
+/** 收尾时最多等天气多久（毫秒）；超时则报告不带天气，后台请求自行结束 */
+export const WEATHER_WAIT_MS = 1500
 
 type Emit = (e: AnalyzeEvent) => void
 
@@ -309,6 +312,32 @@ function stageScoring(ctx: Ctx, center: LngLat, pois: Poi[], iso: Isochrone) {
   return { categories, blindSpots, overall }
 }
 
+/**
+ * 天气（旁路）：定位后立即发起，与采样/算路/检索并行；失败静默——
+ * 不发 error 事件、不进 warnings、不计入 apiStats。返回的 Promise 永不 reject。
+ */
+function startWeather(ctx: Ctx, center: LngLat): Promise<WeatherInfo | undefined> {
+  const fn = ctx.deps.weather
+  if (!fn) return Promise.resolve(undefined)
+  try {
+    return fn(center).then(
+      (w) => w ?? undefined,
+      () => undefined
+    )
+  } catch {
+    return Promise.resolve(undefined)
+  }
+}
+
+/** 最多等 ms 毫秒取天气结果，超时返回 undefined（不阻塞 done） */
+function awaitWeather(p: Promise<WeatherInfo | undefined>, ms: number) {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const timeout = new Promise<undefined>((resolve) => {
+    timer = setTimeout(() => resolve(undefined), ms)
+  })
+  return Promise.race([p, timeout]).finally(() => clearTimeout(timer))
+}
+
 /* ------------------------------------------------------------------ 主入口 */
 
 /**
@@ -350,6 +379,7 @@ export async function runAnalysis(
     fatal(ctx, `百度地图 API 暂不可用，且附近 3 公里内没有内置样例，无法分析`)
   }
   const { center, address } = geo
+  const weatherP = startWeather(ctx, center)
   const bearings = req.bearings && req.bearings >= 4 ? Math.min(req.bearings, 72) : DEFAULT_BEARINGS
 
   const samples = await stageSamplesAndRouting(ctx, center, bearings)
@@ -364,6 +394,7 @@ export async function runAnalysis(
 
   pois = await stagePoiRouting(ctx, center, pois, iso)
   const { categories, blindSpots, overall } = stageScoring(ctx, center, pois, iso)
+  const weather = await awaitWeather(weatherP, WEATHER_WAIT_MS)
 
   const stats = safeStats(d)
   const report: HealthReport = {
@@ -379,6 +410,7 @@ export async function runAnalysis(
     apiStats: { ...stats, elapsedMs: Date.now() - t0 },
     dataSource: ctx.degraded || stats.degraded > 0 ? 'mixed' : 'live',
     warnings: ctx.warnings,
+    ...(weather ? { weather } : {}),
   }
   stage(ctx, 'done', `体检完成：综合 ${report.overallScore} 分（${report.overallGrade} 级）`, 100)
   emit({ type: 'done', report })

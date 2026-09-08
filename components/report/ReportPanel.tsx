@@ -1,5 +1,5 @@
 'use client'
-import type { HealthReport } from '@/lib/types'
+import type { FacilityCategory, HealthReport } from '@/lib/types'
 import { Icon } from '@/components/Icon'
 import SectionHead from '@/components/report/SectionHead'
 import ScoreHeader from '@/components/report/ScoreHeader'
@@ -20,10 +20,21 @@ interface Props {
   printing: boolean
   onPrint: () => void
   onRerun: () => void
+  /** 单点模式：发起「和另一个地点对比」；对比模式下不传 */
+  onCompare?: () => void
+  /** 「模拟新建」入口（移动端顶栏不显示，靠这里进）；带类别 = 建议旁「去模拟」 */
+  onSimulate?: (category?: FacilityCategory) => void
 }
 
 /** 报告面板：图纸式分节，首屏评分 → 图表 → 硬指标 → 盲区 → 建议 → 圈指标 → API 明细 → 图签 */
-export default function ReportPanel({ report, printing, onPrint, onRerun }: Props) {
+export default function ReportPanel({
+  report,
+  printing,
+  onPrint,
+  onRerun,
+  onCompare,
+  onSimulate,
+}: Props) {
   return (
     <article className="relative pb-6">
       <span className="sheet-corner left-2 top-2 hidden md:block" aria-hidden="true" />
@@ -41,7 +52,19 @@ export default function ReportPanel({ report, printing, onPrint, onRerun }: Prop
         </ul>
       )}
 
-      <div className="no-print mx-5 mb-2 flex gap-2">
+      <div className="no-print mx-5 mb-2 flex flex-wrap gap-2">
+        {onCompare && (
+          <button type="button" className="btn btn-primary !min-h-9 text-xs" onClick={onCompare}>
+            <Icon name="compare" size={14} />
+            和另一个地点对比
+          </button>
+        )}
+        {onSimulate && (
+          <button type="button" className="btn !min-h-9 text-xs" onClick={() => onSimulate()}>
+            <Icon name="pin" size={14} />
+            模拟新建
+          </button>
+        )}
         <button type="button" className="btn !min-h-9 text-xs" onClick={onPrint}>
           <Icon name="printer" size={14} />
           导出 PDF
@@ -88,7 +111,7 @@ export default function ReportPanel({ report, printing, onPrint, onRerun }: Prop
 
       <section className="print-avoid px-5 pt-6">
         <SectionHead no="06" title="规划建议" note={`${report.suggestions.length} 条`} />
-        <Suggestions items={report.suggestions} />
+        <Suggestions items={report.suggestions} onSimulate={onSimulate} />
       </section>
 
       <section className="print-avoid px-5 pt-6">

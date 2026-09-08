@@ -40,6 +40,9 @@ function fakeClient(
     async placeSuggestion() {
       return []
     },
+    async weather() {
+      return null
+    },
     async placeSearchNearby({ query }) {
       stats.placeSearch += 1
       const out: BaiduPlaceResult[] = []

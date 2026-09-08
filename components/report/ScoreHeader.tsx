@@ -1,6 +1,7 @@
 import type { HealthReport } from '@/lib/types'
 import { GRADE_COLOR, GRADE_LABEL } from '@/lib/ui/theme'
 import SourceBadge from '@/components/report/SourceBadge'
+import { weatherSummary } from '@/lib/baidu/weather'
 
 const CN_NO = ['一', '二', '三']
 
@@ -20,6 +21,11 @@ export default function ScoreHeader({ report }: { report: HealthReport }) {
               {[report.address.city, report.address.district, report.address.street]
                 .filter(Boolean)
                 .join(' · ')}
+            </p>
+          )}
+          {report.weather && (
+            <p className="mt-1 text-xs text-[var(--ink-2)]" title={report.weather.walkComment}>
+              今日 {weatherSummary(report.weather)}
             </p>
           )}
         </div>

@@ -38,6 +38,12 @@ const UI_ICONS = {
     ],
     circles: [[12, 10, 3]] as [number, number, number][],
   },
+  compare: {
+    paths: [
+      'M9 3H5a2 2 0 0 0-2 2v4m6-6l2 2m-2-2L7 5m8 16h4a2 2 0 0 0 2-2v-4m-6 6l2-2m-2 2l2 2M3 21l18-18',
+    ],
+  },
+  swap: { paths: ['M8 3L4 7l4 4M4 7h16m-4 14l4-4l-4-4m4 4H4'] },
   walk: {
     paths: ['M13 4h-1l-3 6l3 2v5l-2 4M13 4l3 3l3 1M12 12l-3 3l-2 6'],
     circles: [[14, 2, 1.5]] as [number, number, number][],

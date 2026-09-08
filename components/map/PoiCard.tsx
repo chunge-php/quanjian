@@ -5,11 +5,22 @@ import { CATEGORY_LABEL, ESSENTIAL_SET } from '@/lib/ui/theme'
 import { fmtMeters, fmtSecToMin } from '@/lib/ui/format'
 
 /** 点击 POI 后的信息条：名称 / 类别 / 步行分钟（无弹窗，贴在地图上沿） */
-export default function PoiCard({ poi, onClose }: { poi: Poi; onClose: () => void }) {
+export default function PoiCard({
+  poi,
+  onClose,
+  shifted,
+}: {
+  poi: Poi
+  onClose: () => void
+  /** 桌面左下被模拟面板占着时右移 */
+  shifted?: boolean
+}) {
   const min = fmtSecToMin(poi.walkSec)
   const essential = ESSENTIAL_SET.has(poi.category)
   return (
-    <div className="panel map-ui no-print rise-in absolute left-3 right-3 top-[4.5rem] z-[var(--z-overlay)] border border-[var(--line-strong)] bg-[var(--paper)] md:left-4 md:right-auto md:top-auto md:bottom-4 md:w-[22rem]">
+    <div
+      className={`panel map-ui no-print rise-in absolute left-3 right-3 top-[4.5rem] z-[var(--z-overlay)] border border-[var(--line-strong)] bg-[var(--paper)] md:right-auto md:top-auto md:bottom-4 md:w-[22rem] ${shifted ? 'md:left-[24rem]' : 'md:left-4'}`}
+    >
       <div className="flex items-start gap-3 px-3.5 py-3">
         <span
           className={`mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center border ${

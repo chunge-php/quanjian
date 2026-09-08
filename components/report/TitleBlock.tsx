@@ -1,5 +1,6 @@
 import type { HealthReport } from '@/lib/types'
 import { fmtDateTime, fmtLngLat } from '@/lib/ui/format'
+import { weatherSummary } from '@/lib/baidu/weather'
 
 /** 图签（title block）：图纸右下角那张表，报告身份信息都在这 */
 export default function TitleBlock({ report }: { report: HealthReport }) {
@@ -20,6 +21,9 @@ export default function TitleBlock({ report }: { report: HealthReport }) {
     ['报告编号', report.id],
     ['出图', '圈见 · quanjian'],
   ]
+  // 有天气才加一行（两格），保证单元格数为偶数、每行两组
+  if (report.weather)
+    cells.push(['天气', weatherSummary(report.weather)], ['步行舒适', report.weather.walkComment])
   return (
     <table
       className="w-full border-collapse border border-[var(--ink)] text-xs"

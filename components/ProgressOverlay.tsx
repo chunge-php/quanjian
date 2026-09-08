@@ -27,11 +27,19 @@ interface Props {
   stage: AnalyzeStage | null
   progress: number
   message: string
+  /** 左上小标，默认「分析中」；对比模式传「分析对比地点 B」 */
+  title?: string
   onCancel: () => void
 }
 
 /** 分析进度：贴在地图左下，像图纸角落的施工日志，不遮挡地图主体 */
-export default function ProgressOverlay({ stage, progress, message, onCancel }: Props) {
+export default function ProgressOverlay({
+  stage,
+  progress,
+  message,
+  title = '分析中',
+  onCancel,
+}: Props) {
   const idx = stage ? ORDER.indexOf(stage) : -1
   return (
     <div
@@ -51,7 +59,7 @@ export default function ProgressOverlay({ stage, progress, message, onCancel }: 
       <div className="flex items-start gap-3 px-3.5 pb-3 pt-2.5">
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
-            <span className="kicker">分析中</span>
+            <span className="kicker">{title}</span>
             <span className="figure text-xs text-[var(--ink-3)]">
               {Math.round(progress * 100)}%
             </span>

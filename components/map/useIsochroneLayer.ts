@@ -1,7 +1,7 @@
 'use client'
 import { useEffect } from 'react'
 import type { Isochrone } from '@/lib/types'
-import { MAP_OVERLAY, RING_STYLE, sampleDotUrl } from '@/lib/ui/theme'
+import { MAP_OVERLAY, RING_STYLE, sampleDotUrl, sampleShade } from '@/lib/ui/theme'
 
 /** 三环等时圈：15 分钟最外、5 分钟最内，先画外环再画内环，透明度叠加成热力渐变 */
 export function useIsochroneLayer(map: BMapGL.Map | null, isochrone: Isochrone | null) {
@@ -28,17 +28,25 @@ export function useIsochroneLayer(map: BMapGL.Map | null, isochrone: Isochrone |
   }, [map, isochrone])
 }
 
-/** 调试：等时圈采样点 */
+/** 采样点：算等时圈用的探测点，颜色深浅 = 步行分钟，用来核对圈的形状 */
 export function useSampleLayer(map: BMapGL.Map | null, isochrone: Isochrone | null, show: boolean) {
   useEffect(() => {
     const B = window.BMapGL
     if (!map || !B || !isochrone || !show) return
     const overlays: BMapGL.Overlay[] = []
-    const okIcon = new B.Icon(sampleDotUrl(true), new B.Size(8, 8), { anchor: new B.Size(4, 4) })
-    const badIcon = new B.Icon(sampleDotUrl(false), new B.Size(8, 8), { anchor: new B.Size(4, 4) })
+    const icons = new Map<string, BMapGL.Icon>()
+    const iconFor = (shade: number | null) => {
+      const key = String(shade)
+      let ic = icons.get(key)
+      if (!ic) {
+        ic = new B.Icon(sampleDotUrl(shade), new B.Size(10, 10), { anchor: new B.Size(5, 5) })
+        icons.set(key, ic)
+      }
+      return ic
+    }
     for (const s of isochrone.samples) {
       const m = new B.Marker(new B.Point(s.point.lng, s.point.lat), {
-        icon: s.walkSec == null ? badIcon : okIcon,
+        icon: iconFor(sampleShade(s.walkSec)),
         title:
           s.walkSec == null
             ? `${s.bearingDeg}° ${s.radiusM} m · 不可达`

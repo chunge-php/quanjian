@@ -1,74 +1,52 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { LngLat } from '@/lib/types'
+import type { FacilityCategory, HealthReport, LngLat } from '@/lib/types'
+import type { Slot } from '@/lib/ui/compare'
+import { slotName } from '@/lib/ui/compare'
 import MapView from '@/components/map/MapView'
 import SearchBox from '@/components/SearchBox'
-import TopBar from '@/components/TopBar'
+import TopBar, { type CompareMode } from '@/components/TopBar'
 import Drawer from '@/components/Drawer'
 import Toast from '@/components/Toast'
 import ProgressOverlay from '@/components/ProgressOverlay'
 import ReportPanel from '@/components/report/ReportPanel'
 import EmptyState from '@/components/report/EmptyState'
 import RunningPanel from '@/components/RunningPanel'
-import { useAnalyze } from '@/lib/ui/useAnalyze'
+import ComparePanel from '@/components/compare/ComparePanel'
+import SimulatePanel from '@/components/simulate/SimulatePanel'
+import { useSlots } from '@/lib/ui/useSlots'
+import { useSimulateWiring } from '@/lib/ui/useSimulateWiring'
+import { useHealth } from '@/lib/ui/useHealth'
 import { toast } from '@/lib/ui/toast'
 import { MOCK_CENTER } from '@/lib/ui/mockReport'
-
-interface Health {
-  ok: boolean
-  hasServerAk: boolean
-  sampleCount: number
-}
 
 type Snap = 'peek' | 'half' | 'full'
 
 export default function AppShell({ forceMock }: { forceMock: boolean }) {
   const [mock, setMock] = useState(forceMock)
-  const [health, setHealth] = useState<Health | null>(null)
-  const [backendDown, setBackendDown] = useState(false)
-  const [center, setCenter] = useState<LngLat | null>(null)
+  const { health, backendDown } = useHealth(forceMock)
   const [showSamples, setShowSamples] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(true)
   const [snap, setSnap] = useState<Snap>('peek')
   const [isDesktop, setIsDesktop] = useState(true)
   const [fitKey, setFitKey] = useState(0)
   const [printing, setPrinting] = useState(false)
+  /** 对比：正在选 B 地点 / 地图设施与盲区聚焦哪一边 */
+  const [picking, setPicking] = useState(false)
+  const [focus, setFocus] = useState<Slot>('A')
   const lastIsoRef = useRef<unknown>(null)
-  const { state, run, cancel, reset } = useAnalyze()
+  const { A, B, state, runningSlot, analyze, cancel, swap, removeB } = useSlots()
 
-  // 后端健康检查：最多重试 3 次（开发模式首个请求要等路由编译），全部失败才切本地样例。
-  // 注意：React 严格模式会把首个 effect 立即清理，AbortError 不能算作后端故障。
+  const hasB = B.center != null
+  const running = state.status === 'running'
+  const focused = focus === 'B' && hasB ? B : A
+  /** 模拟只作用于聚焦的一侧；切聚焦 = 报告换了 → 拟建列表自动清空（hook 内提示） */
+  const simw = useSimulateWiring(focused.report)
+  const { sim, clearPrintReport } = simw
+
   useEffect(() => {
-    if (forceMock) return
-    const ctrl = new AbortController()
-    let cancelled = false
-    const probe = async () => {
-      const delays = [0, 1200, 2500]
-      for (let i = 0; i < delays.length; i++) {
-        if (delays[i]) await new Promise((r) => setTimeout(r, delays[i]))
-        if (cancelled) return
-        try {
-          const r = await fetch('/api/health', { signal: ctrl.signal, cache: 'no-store' })
-          if (r.ok) {
-            const h = (await r.json()) as Health
-            if (!cancelled) setHealth(h)
-            return
-          }
-        } catch (e) {
-          if ((e as { name?: string })?.name === 'AbortError') return
-        }
-      }
-      if (!cancelled) {
-        setBackendDown(true)
-        setMock(true)
-      }
-    }
-    void probe()
-    return () => {
-      cancelled = true
-      ctrl.abort()
-    }
-  }, [forceMock])
+    if (backendDown) setMock(true)
+  }, [backendDown])
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)')
@@ -80,16 +58,19 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
 
   useEffect(() => {
     const before = () => setPrinting(true)
-    const after = () => setPrinting(false)
+    const after = () => {
+      setPrinting(false)
+      clearPrintReport()
+    }
     window.addEventListener('beforeprint', before)
     window.addEventListener('afterprint', after)
     return () => {
       window.removeEventListener('beforeprint', before)
       window.removeEventListener('afterprint', after)
     }
-  }, [])
+  }, [clearPrintReport])
 
-  // 等时圈首次到达 → 适配视野
+  // 等时圈首次到达 → 适配视野（对比模式下同时包住两个圈）
   useEffect(() => {
     if (state.isochrone && state.isochrone !== lastIsoRef.current) {
       lastIsoRef.current = state.isochrone
@@ -99,27 +80,75 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
 
   useEffect(() => {
     if (state.status === 'error' && state.error) toast(state.error, 'error', 6000)
-    if (state.status === 'done') toast('体检完成', 'success', 2200)
-  }, [state.status, state.error])
+    if (state.status === 'done')
+      toast(runningSlot === 'B' ? '对比地点 B 体检完成' : '体检完成', 'success', 2200)
+  }, [state.status, state.error, runningSlot])
 
-  const analyze = useCallback(
-    (c: LngLat, address?: string) => {
-      setCenter(c)
+  const analyzeSlot = useCallback(
+    (slot: Slot, c: LngLat, label?: string) => {
+      setPicking(false)
+      setFocus(slot)
       setDrawerOpen(true)
       lastIsoRef.current = null
-      void run({ center: c, address }, { mock, onRecoverableError: (m) => toast(m, 'warn') })
+      analyze(slot, c, label, { mock, onRecoverableError: (m) => toast(m, 'warn') })
     },
-    [run, mock]
+    [analyze, mock]
   )
 
-  const onCenterChange = useCallback((p: LngLat) => analyze(p), [analyze])
+  /** 搜索框 / 样例选中：选 B 模式落到 B，否则 A */
+  const onSearchPick = useCallback(
+    (c: LngLat, label?: string) => analyzeSlot(picking ? 'B' : 'A', c, label),
+    [analyzeSlot, picking]
+  )
+  /** 地图点击 / 拖标：选 B 模式一律落到 B；否则由 MapView 按聚焦槽位决定 */
+  const onCenterChange = useCallback(
+    (p: LngLat, _src: 'click' | 'drag', slot: Slot) => analyzeSlot(picking ? 'B' : slot, p),
+    [analyzeSlot, picking]
+  )
   const onMapStatus = useCallback((s: 'loading' | 'ready' | 'error', err?: string) => {
     if (s === 'error' && err) toast(err, 'error', 8000)
   }, [])
 
+  const startCompare = useCallback(() => {
+    if (!A.report || running) return
+    setPicking(true)
+    if (!isDesktop) setDrawerOpen(false)
+    toast('在搜索框输入要对比的小区，或直接在地图上点一下', 'info', 3600)
+  }, [A.report, running, isDesktop])
+
+  const onSwap = () => {
+    swap()
+    setFocus((f) => (f === 'A' ? 'B' : 'A'))
+    setFitKey((k) => k + 1)
+  }
+  const onRemove = () => {
+    removeB()
+    setPicking(false)
+    setFocus('A')
+    setFitKey((k) => k + 1)
+  }
+  const onRetryB = () => B.center && analyzeSlot('B', B.center, B.label ?? undefined)
+  const onRerun = (slot: Slot) => {
+    const s = slot === 'A' ? A : B
+    if (s.center) analyzeSlot(slot, s.center, s.label ?? undefined)
+  }
+
   const onPrint = () => {
     setDrawerOpen(true)
     window.setTimeout(() => window.print(), 80)
+  }
+  const onExportSimulated = (simulated: HealthReport) =>
+    simw.exportSimulated(simulated, () => setDrawerOpen(true))
+  /** 报告面板里的「模拟新建 / 去模拟」：对比模式先把聚焦切到该侧 */
+  const onSimulateFrom = (slot: Slot, category?: FacilityCategory) => {
+    if (picking) setPicking(false)
+    setFocus(slot)
+    simw.openPanel(category)
+  }
+  /** 移动端面板放抽屉里，抽屉收着就先拉起来 */
+  const openSimulate = () => {
+    simw.toggle()
+    if (!isDesktop && !simw.open) setDrawerOpen(true)
   }
 
   const notice = forceMock
@@ -138,18 +167,57 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
         ? Math.round(window.innerHeight * 0.5)
         : 132
   const rightInset = isDesktop && drawerOpen ? 400 : 0
-  const running = state.status === 'running'
+  const simOnMap = isDesktop && simw.open && !!focused.report
+  const leftInset = simOnMap ? 368 : 0
+  const compareMode: CompareMode = picking ? 'picking' : hasB ? 'on' : 'off'
+  const nameA = A.label ?? slotName(A.report)
+  const nameB = B.label ?? slotName(B.report)
+  const simPanelProps = focused.report
+    ? {
+        report: focused.report,
+        virtuals: sim.virtuals,
+        result: sim.result,
+        placing: sim.placing,
+        onSetPlacing: sim.setPlacing,
+        onRemove: sim.remove,
+        onUndo: sim.undo,
+        onClear: sim.clear,
+        onClose: simw.closePanel,
+        onExport: onExportSimulated,
+      }
+    : null
 
   return (
     <main className="relative h-[100dvh] w-full overflow-hidden bg-[var(--paper)]">
       <MapView
-        center={center}
-        isochrone={state.isochrone}
-        pois={state.pois}
-        blindSpots={state.report?.blindSpots ?? null}
+        center={A.center}
+        isochrone={A.isochrone}
+        compare={
+          hasB
+            ? {
+                center: B.center,
+                isochrone: B.isochrone,
+                nameA,
+                nameB,
+                runningB: B.running,
+                switchTop: notice ? '7.4rem' : isDesktop ? '3.9rem' : '3.75rem',
+              }
+            : null
+        }
+        focus={hasB ? focus : 'A'}
+        onFocusChange={setFocus}
+        pois={focused.pois}
+        blindSpots={simw.blindSpots}
+        focusIsochrone={focused.isochrone}
         showSamples={showSamples}
+        onToggleSamples={() => setShowSamples((v) => !v)}
         rightInset={rightInset}
         bottomInset={bottomInset}
+        leftInset={leftInset}
+        placing={sim.placing}
+        virtuals={sim.virtuals}
+        onPlaceVirtual={sim.addVirtual}
+        onRemoveVirtual={sim.remove}
         fitKey={fitKey}
         onCenterChange={onCenterChange}
         onStatus={onMapStatus}
@@ -158,13 +226,19 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
       <SearchBox
         busy={running}
         mock={mock}
-        region={state.report?.address.city || '重庆市'}
-        onPick={analyze}
+        region={A.report?.address.city || '重庆市'}
+        compareMode={picking}
+        onCancelCompare={() => setPicking(false)}
+        onPick={onSearchPick}
       />
       <TopBar
-        canPrint={!!state.report}
-        showSamples={showSamples}
-        onToggleSamples={() => setShowSamples((v) => !v)}
+        canPrint={!!A.report}
+        canCompare={!!A.report && !running}
+        compare={compareMode}
+        onCompare={() => (picking ? setPicking(false) : startCompare())}
+        canSimulate={!!focused.report && !running}
+        simulate={simw.mode}
+        onSimulate={openSimulate}
         onPrint={onPrint}
         notice={notice}
         drawerOpen={drawerOpen}
@@ -177,17 +251,58 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
           stage={state.stage}
           progress={state.progress}
           message={state.message}
+          title={
+            hasB
+              ? `分析 ${runningSlot} · ${runningSlot === 'B' ? '对比地点' : '当前地点'}`
+              : '分析中'
+          }
           onCancel={cancel}
         />
       )}
 
+      {simOnMap && simPanelProps && (
+        <SimulatePanel
+          className="map-ui no-print absolute bottom-4 left-4 z-[var(--z-overlay)] w-[22rem] max-h-[calc(100dvh-8rem)]"
+          {...simPanelProps}
+        />
+      )}
+
       <Drawer open={drawerOpen} onOpenChange={setDrawerOpen} onSnapChange={setSnap}>
-        {state.report ? (
+        {!isDesktop && simw.open && simPanelProps && !simw.printReport && (
+          <SimulatePanel className="mx-3 mb-2 mt-3" {...simPanelProps} />
+        )}
+        {simw.printReport ? (
           <ReportPanel
-            report={state.report}
+            report={simw.printReport}
             printing={printing}
             onPrint={onPrint}
-            onRerun={() => center && analyze(center)}
+            onRerun={() => onRerun(focus)}
+          />
+        ) : hasB ? (
+          <ComparePanel
+            A={A}
+            B={B}
+            state={state}
+            runningSlot={runningSlot}
+            nameA={nameA}
+            nameB={nameB}
+            printing={printing}
+            onSwap={onSwap}
+            onChangeB={startCompare}
+            onRemove={onRemove}
+            onPrint={onPrint}
+            onRerun={onRerun}
+            onRetryB={onRetryB}
+            onSimulate={onSimulateFrom}
+          />
+        ) : A.report ? (
+          <ReportPanel
+            report={A.report}
+            printing={printing}
+            onPrint={onPrint}
+            onRerun={() => onRerun('A')}
+            onCompare={startCompare}
+            onSimulate={(c) => onSimulateFrom('A', c)}
           />
         ) : running ? (
           <RunningPanel state={state} />
@@ -195,10 +310,10 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
           <EmptyState
             mock={mock}
             noServerAk={!!health && !health.hasServerAk}
-            onUseSample={() => analyze(MOCK_CENTER, '重庆璧山 · 东林大道')}
+            onUseSample={() => analyzeSlot('A', MOCK_CENTER, '重庆璧山 · 东林大道')}
           />
         )}
-        {state.status === 'error' && !state.report && (
+        {state.status === 'error' && !A.report && !hasB && (
           <div className="mx-5 mb-6 border border-[var(--vermilion)] px-4 py-3 text-sm">
             <p className="font-medium text-[var(--vermilion)]">分析失败</p>
             <p className="mt-1 break-words text-[var(--ink-2)]">{state.error}</p>
@@ -206,11 +321,11 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
               <button
                 type="button"
                 className="btn !min-h-9 text-xs"
-                onClick={() => center && analyze(center)}
+                onClick={() => A.center && analyzeSlot('A', A.center, A.label ?? undefined)}
               >
                 重试
               </button>
-              <button type="button" className="btn btn-ghost !min-h-9 text-xs" onClick={reset}>
+              <button type="button" className="btn btn-ghost !min-h-9 text-xs" onClick={onRemove}>
                 清除
               </button>
             </div>

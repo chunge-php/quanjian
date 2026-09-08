@@ -55,7 +55,9 @@ export function usePoiLayer(
 export function useCenterMarker(
   map: BMapGL.Map | null,
   center: LngLat | null,
-  onDragEnd: (p: LngLat) => void
+  onDragEnd: (p: LngLat) => void,
+  /** 对比模式：A 青 / B 赭，圈里带字母；不传 = 单点朱砂 */
+  slot?: 'A' | 'B'
 ) {
   const cbRef = useRef(onDragEnd)
   cbRef.current = onDragEnd
@@ -64,11 +66,13 @@ export function useCenterMarker(
   useEffect(() => {
     const B = window.BMapGL
     if (!map || !B) return
-    const icon = new B.Icon(centerMarkerUrl(), new B.Size(44, 44), { anchor: new B.Size(22, 22) })
+    const icon = new B.Icon(centerMarkerUrl(slot), new B.Size(44, 44), {
+      anchor: new B.Size(22, 22),
+    })
     const marker = new B.Marker(new B.Point(center?.lng ?? 0, center?.lat ?? 0), {
       icon,
       enableDragging: true,
-      title: '分析中心点（可拖动）',
+      title: slot ? `${slot} 中心点（可拖动）` : '分析中心点（可拖动）',
     })
     marker.addEventListener('dragend', () => {
       const p = marker.getPosition()
@@ -81,9 +85,9 @@ export function useCenterMarker(
       map.removeOverlay(marker)
       markerRef.current = null
     }
-    // 只在 map 变化时重建，位置变化走 setPosition
+    // 只在 map / 槽位样式变化时重建，位置变化走 setPosition
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map])
+  }, [map, slot])
 
   useEffect(() => {
     const B = window.BMapGL

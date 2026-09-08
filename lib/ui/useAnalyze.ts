@@ -88,6 +88,12 @@ export function useAnalyze() {
     abortRef.current?.abort()
     abortRef.current = null
     runIdRef.current += 1
+    // 取消后退出 running：有报告回 done，没有回 idle（否则进度条会一直挂着）
+    setState((s) =>
+      s.status === 'running'
+        ? { ...s, status: s.report ? 'done' : 'idle', message: '已取消', stage: null }
+        : s
+    )
   }, [])
 
   useEffect(() => () => abortRef.current?.abort(), [])

@@ -28,11 +28,21 @@ interface Props {
   mock: boolean
   /** 联想偏向的城市（当前报告所在城市），同城候选排前 */
   region?: string
+  /** 对比地点模式：选定的地点作为 B 跑第二次分析 */
+  compareMode?: boolean
+  onCancelCompare?: () => void
   onPick: (center: LngLat, label: string) => void
 }
 
-/** 左上搜索：地址 → /api/geocode；或从内置样例挑一个；或直接点地图 */
-export default function SearchBox({ busy, mock, region, onPick }: Props) {
+/** 左上搜索：地址 → /api/geocode；或从内置样例挑一个；或直接点地图。对比模式下同一个框选 B 地点 */
+export default function SearchBox({
+  busy,
+  mock,
+  region,
+  compareMode = false,
+  onCancelCompare,
+  onPick,
+}: Props) {
   const [q, setQ] = useState('')
   const [geocoding, setGeocoding] = useState(false)
   const [samples, setSamples] = useState<SampleItem[]>(mock ? MOCK_SAMPLES : [])
@@ -70,6 +80,15 @@ export default function SearchBox({ busy, mock, region, onPick }: Props) {
       setFocused(false)
     }
   }
+
+  // 进入 / 退出对比模式：清空输入并聚焦，让用户直接打字
+  const inputRef = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    setQ('')
+    setPicked('')
+    setActive(-1)
+    if (compareMode) inputRef.current?.focus()
+  }, [compareMode])
 
   useEffect(() => {
     if (mock) {
@@ -143,16 +162,38 @@ export default function SearchBox({ busy, mock, region, onPick }: Props) {
     >
       <form
         onSubmit={submit}
-        className="panel flex border border-[var(--ink)] bg-[var(--paper)]"
+        className={`panel flex border bg-[var(--paper)] ${
+          compareMode
+            ? 'border-[var(--ochre)] ring-2 ring-[var(--ochre)]/25'
+            : 'border-[var(--ink)]'
+        }`}
         role="search"
       >
         <label htmlFor="addr" className="sr-only">
-          输入地址或小区名
+          {compareMode ? '输入要对比的小区或地址' : '输入地址或小区名'}
         </label>
+        {compareMode && (
+          <span
+            className="flex shrink-0 items-center gap-1.5 border-r border-[var(--line-strong)] pl-2.5 pr-2 text-xs font-medium text-[var(--ink)]"
+            title="对比地点 B：搜索，或直接在地图上点一下"
+          >
+            <span
+              className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-[var(--paper)]"
+              style={{ background: 'var(--ochre)' }}
+              aria-hidden="true"
+            >
+              B
+            </span>
+            对比地点
+          </span>
+        )}
         <input
           id="addr"
+          ref={inputRef}
           className="input !border-0 !shadow-none"
-          placeholder="输入地址 / 小区名，或直接在地图上点一下"
+          placeholder={
+            compareMode ? '输入要对比的小区 / 地址' : '输入地址 / 小区名，或直接在地图上点一下'
+          }
           value={q}
           onChange={(e) => {
             setQ(e.target.value)
@@ -173,25 +214,38 @@ export default function SearchBox({ busy, mock, region, onPick }: Props) {
           type="submit"
           className="btn btn-primary !border-0 shrink-0"
           disabled={geocoding || busy || !q.trim()}
-          aria-label="搜索并分析"
+          aria-label={compareMode ? '搜索并作为对比地点分析' : '搜索并分析'}
         >
           <Icon name="search" size={16} />
-          <span className="hidden sm:inline">{geocoding ? '定位中…' : '体检'}</span>
+          <span className="hidden sm:inline">
+            {geocoding ? '定位中…' : compareMode ? '对比' : '体检'}
+          </span>
         </button>
-        <button
-          type="button"
-          className="btn !border-0 !border-l !border-l-[var(--line-strong)] shrink-0 !px-2.5 text-xs"
-          onClick={() => setSamplesOpen((v) => !v)}
-          aria-expanded={samplesOpen}
-          aria-haspopup="listbox"
-        >
-          样例
-          <Icon
-            name="chevronDown"
-            size={12}
-            className={`transition-transform duration-200 ${samplesOpen ? 'rotate-180' : ''}`}
-          />
-        </button>
+        {compareMode ? (
+          <button
+            type="button"
+            className="btn !border-0 !border-l !border-l-[var(--line-strong)] shrink-0 !px-2.5 text-xs"
+            onClick={onCancelCompare}
+          >
+            <Icon name="x" size={14} />
+            取消
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="btn !border-0 !border-l !border-l-[var(--line-strong)] shrink-0 !px-2.5 text-xs"
+            onClick={() => setSamplesOpen((v) => !v)}
+            aria-expanded={samplesOpen}
+            aria-haspopup="listbox"
+          >
+            样例
+            <Icon
+              name="chevronDown"
+              size={12}
+              className={`transition-transform duration-200 ${samplesOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
+        )}
       </form>
       {showSuggest && !samplesOpen && (
         <SuggestList

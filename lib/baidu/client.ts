@@ -1,7 +1,7 @@
 /**
  * 百度地图 Web 服务 API 客户端（服务端专用，AK 不下发浏览器）。
  *
- * 覆盖：地理编码 / 逆地理编码 / 地点检索（周边）/ 批量算路（步行）。
+ * 覆盖：地理编码 / 逆地理编码 / 地点检索（周边）/ 批量算路（步行）/ 国内天气查询。
  * 统一处理：限流 + 并发 + 退避重试 + 缓存 + 统计计数。
  *
  * 坐标约定：内部 LngLat={lng,lat}；百度传参是 "lat,lng"，返回是 {lng,lat}。
@@ -11,17 +11,20 @@
  * - place/v2/search：page_size 上限 20（传 50 也只回 20）
  * - 并发：≥3 稳定 401；2 偶发；单次 routematrix 耗时 ≈0.9s
  */
-import type { ApiStats, HealthReport, LngLat } from '../types'
+import type { ApiStats, HealthReport, LngLat, WeatherInfo } from '../types'
 import { BaiduApiError, BaiduConfigError, BaiduNetworkError, isRetryableError } from './errors'
 import { cacheKey, createCache, stripSecrets, type ResponseCache } from './cache'
 import { createLimiter, withRetry, type Limiter } from './limiter'
 import { fromBaiduLocation, joinLatLng, toLatLngParam } from './geo'
+import { parseWeather } from './weather'
 
 export const BAIDU_API_BASE = 'https://api.map.baidu.com'
 /** 批量算路单次请求最多点对数（实测） */
 export const ROUTE_MATRIX_MAX_PAIRS = 100
 /** 地点检索每页上限（实测） */
 export const PLACE_PAGE_SIZE_MAX = 20
+/** 国内天气查询端点 */
+const WEATHER_ENDPOINT = '/weather/v1/'
 /** 默认 QPS / 并发（实测得出，可用 BAIDU_QPS / BAIDU_MAX_CONCURRENCY 覆盖） */
 export const DEFAULT_QPS = 3
 export const DEFAULT_CONCURRENCY = 2
@@ -107,6 +110,14 @@ export interface SuggestionItem {
   tag?: string
 }
 
+/** 天气查询参数：优先用 location（实测支持 `lng,lat`），其次 adcode（district_id） */
+export interface WeatherParams {
+  /** 行政区划编码（逆地理编码 addressComponent.adcode） */
+  adcode?: string
+  /** 中心点坐标（BD-09） */
+  location?: LngLat
+}
+
 export interface BaiduClient {
   /** 是否配置了 AK（无 AK 时调用会抛 BaiduConfigError） */
   readonly hasAk: boolean
@@ -126,6 +137,12 @@ export interface BaiduClient {
     origins: LngLat[],
     destinations: LngLat[]
   ): Promise<(RouteMatrixCell | null)[][]>
+  /**
+   * 国内天气查询（/weather/v1/，data_type=all）：返回实况 + 3 天预报 + 步行舒适度提示。
+   * 不走缓存、不计入 stats（时效性强且不属于"API 深度调用"口径）；
+   * location 与 adcode 都缺、或返回无实况数据时返回 null；网络 / AK 错误抛异常。
+   */
+  weather(params: WeatherParams): Promise<WeatherInfo | null>
   /** 累计统计 */
   readonly stats: ApiStats
   resetStats(): void
@@ -324,6 +341,31 @@ export function createBaiduClient(opts: BaiduClientOptions = {}): BaiduClient {
         if (Number.isFinite(total) && out.length >= total) break
       }
       return out
+    },
+
+    async weather({ adcode, location }) {
+      if (!ak) throw new BaiduConfigError()
+      // 候选参数：先 location（实测支持 lng,lat），再 district_id；前者被拒（如坐标越界 status 41）时回退后者
+      const candidates: Record<string, string | undefined>[] = []
+      if (location) candidates.push({ location: `${location.lng},${location.lat}` })
+      if (adcode?.trim()) candidates.push({ district_id: adcode.trim() })
+      if (!candidates.length) return null
+      let lastErr: unknown
+      for (const params of candidates) {
+        const url = buildUrl(WEATHER_ENDPOINT, { ...params, data_type: 'all' })
+        try {
+          // 不走 request()：不缓存、不计入 stats；只重试 1 次，避免拖慢主流程
+          const data = await withRetry(
+            () => limiter.schedule(() => fetchJson(WEATHER_ENDPOINT, url)),
+            { retries: 1, baseDelayMs: opts.retryBaseMs ?? 500, shouldRetry: isRetryableError }
+          )
+          return parseWeather(data.result, new Date().toISOString())
+        } catch (err) {
+          lastErr = err
+          if (!(err instanceof BaiduApiError)) throw err
+        }
+      }
+      throw lastErr
     },
 
     async routeMatrixWalking(origins, destinations) {

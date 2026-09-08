@@ -9,6 +9,13 @@ import { isCategoryOn, isOnlyEssential, type LayerFilter } from '@/lib/ui/layerF
 interface Props {
   hasBlindSpots: boolean
   hasPois: boolean
+  hasIsochrone: boolean
+  /** 地图上有拟建设施（模拟）时加一行说明 */
+  hasVirtuals: boolean
+  /** 对比模式：等时圈行显示 A 青 / B 赭 两个色样 */
+  compare: boolean
+  showSamples: boolean
+  onToggleSamples: () => void
   rightInset: number
   filter: LayerFilter
   counts: Record<FacilityCategory, { inIso: number; total: number }>
@@ -58,22 +65,19 @@ export default function MapLegend(p: Props) {
             label="步行等时圈"
             onClick={() => p.onToggleLayer('showIsochrone')}
           >
-            <span className="relative inline-block h-5 w-14" aria-hidden="true">
-              <span
-                className="absolute inset-0 rounded-[3px] border border-[var(--teal)]"
-                style={{ background: 'rgba(31,110,106,0.1)' }}
-              />
-              <span
-                className="absolute inset-y-[3px] left-[9px] right-[9px] rounded-[2px] border border-[var(--teal)]/70"
-                style={{ background: 'rgba(31,110,106,0.18)' }}
-              />
-              <span
-                className="absolute inset-y-[6px] left-[19px] right-[19px] rounded-[2px] border border-[var(--teal)]/70"
-                style={{ background: 'rgba(31,110,106,0.3)' }}
-              />
-            </span>
-            <span className="figure text-[var(--ink)]">15′ · 10′ · 5′</span>
+            <RingSwatch color="var(--teal)" rgb="31,110,106" />
+            {p.compare ? (
+              <>
+                <span className="figure text-[var(--teal)]">A</span>
+                <RingSwatch color="var(--ochre)" rgb="176,128,31" dashed />
+                <span className="figure text-[var(--ochre)]">B</span>
+                <span className="text-[var(--ink-3)]">· 未聚焦的只画 15′ 外圈</span>
+              </>
+            ) : (
+              <span className="figure text-[var(--ink)]">15′ · 10′ · 5′</span>
+            )}
           </LayerRow>
+          {p.hasIsochrone && <SampleToggle on={p.showSamples} onToggle={p.onToggleSamples} />}
 
           {p.hasBlindSpots && (
             <LayerRow
@@ -91,6 +95,28 @@ export default function MapLegend(p: Props) {
               ))}
               <span className="ml-1 text-[var(--ink)]">缺 1 → 3 类</span>
             </LayerRow>
+          )}
+
+          {p.hasVirtuals && (
+            <div className="-mx-1 mb-1 rounded-[6px] px-1 py-1">
+              <span className="kicker mb-1 flex w-full items-center justify-between">
+                拟建设施（模拟）
+                <span className="normal-case tracking-normal">点标记可移除</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span
+                  className="inline-flex h-5 w-5 items-center justify-center rounded-full border-2 border-dashed border-[var(--vermilion)] bg-[var(--paper)] text-[var(--vermilion)]"
+                  aria-hidden="true"
+                >
+                  <Icon name="pin" size={11} />
+                </span>
+                <span
+                  className="inline-block h-5 w-9 rounded-full border border-dashed border-[var(--vermilion)] bg-[rgba(184,58,42,0.05)]"
+                  aria-hidden="true"
+                />
+                <span className="text-[var(--ink)]">1 km 虚线圈 = 盲区判定半径</span>
+              </span>
+            </div>
           )}
 
           <div className="mb-1.5 mt-2.5 flex items-center justify-between">
@@ -170,6 +196,81 @@ export default function MapLegend(p: Props) {
   )
 }
 
+function RingSwatch({ color, rgb, dashed }: { color: string; rgb: string; dashed?: boolean }) {
+  const border = dashed ? 'border-dashed' : ''
+  return (
+    <span className="relative inline-block h-5 w-14" aria-hidden="true">
+      <span
+        className={`absolute inset-0 rounded-[3px] border ${border}`}
+        style={{ borderColor: color, background: `rgba(${rgb},0.1)` }}
+      />
+      {!dashed && (
+        <>
+          <span
+            className="absolute inset-y-[3px] left-[9px] right-[9px] rounded-[2px] border"
+            style={{ borderColor: color, background: `rgba(${rgb},0.18)` }}
+          />
+          <span
+            className="absolute inset-y-[6px] left-[19px] right-[19px] rounded-[2px] border"
+            style={{ borderColor: color, background: `rgba(${rgb},0.3)` }}
+          />
+        </>
+      )}
+    </span>
+  )
+}
+
+/** 采样点小开关：挂在等时圈行下面，(?) 展开一段解释，文字换行不截断 */
+function SampleToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+  const [tip, setTip] = useState(false)
+  return (
+    <div className="relative -mt-0.5 mb-1.5 flex items-center gap-1.5 pl-1 text-xs text-[var(--ink-2)]">
+      <label className="flex cursor-pointer select-none items-center gap-1.5">
+        <input type="checkbox" className="accent-[var(--teal)]" checked={on} onChange={onToggle} />
+        采样点
+      </label>
+      <span className="inline-flex items-center gap-0.5" aria-hidden="true">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <span
+            key={i}
+            className="inline-block rounded-full"
+            style={{
+              width: 5 + i,
+              height: 5 + i,
+              background: ['#7fc9c3', '#3fa39c', '#0e8c84', '#0b6660', '#083f3c'][i],
+            }}
+          />
+        ))}
+      </span>
+      <button
+        type="button"
+        className={`ml-auto inline-flex h-5 w-5 items-center justify-center rounded-full border text-[11px] leading-none transition-colors duration-150 ${
+          tip
+            ? 'border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]'
+            : 'border-[var(--line-strong)] text-[var(--ink-3)] hover:border-[var(--ink)] hover:text-[var(--ink)]'
+        }`}
+        aria-label="采样点是什么"
+        aria-expanded={tip}
+        aria-controls="sample-tip"
+        onClick={() => setTip((v) => !v)}
+        onBlur={() => setTip(false)}
+      >
+        ?
+      </button>
+      {tip && (
+        <p
+          id="sample-tip"
+          role="tooltip"
+          className="panel rise-in absolute bottom-full right-0 z-10 mb-1.5 w-[17rem] border border-[var(--ink)] bg-[var(--paper)] px-3 py-2 text-xs leading-5 text-[var(--ink)]"
+        >
+          算等时圈用的 112 个探测点，颜色深浅 = 步行分钟（浅 ≤5′ → 深 &gt;20′，朱砂 =
+          不可达），用来核对圈的形状。
+        </p>
+      )}
+    </div>
+  )
+}
+
 function LayerRow({
   on,
   label,
@@ -195,7 +296,7 @@ function LayerRow({
         {label}
         <span className="normal-case tracking-normal">{on ? '显示' : '已隐藏'}</span>
       </span>
-      <span className="flex items-center gap-1.5">{children}</span>
+      <span className="flex flex-wrap items-center gap-1.5">{children}</span>
     </button>
   )
 }

@@ -1,10 +1,19 @@
 'use client'
 import { Icon } from '@/components/Icon'
+import type { SimulateMode } from '@/lib/ui/useSimulateWiring'
+
+export type CompareMode = 'off' | 'picking' | 'on'
 
 interface Props {
   canPrint: boolean
-  showSamples: boolean
-  onToggleSamples: () => void
+  /** 有报告才能发起对比 */
+  canCompare: boolean
+  compare: CompareMode
+  onCompare: () => void
+  /** 模拟新建：有报告才可用；关 / 开 / 放置中 三态 */
+  canSimulate: boolean
+  simulate: SimulateMode
+  onSimulate: () => void
   onPrint: () => void
   notice: string | null
   drawerOpen: boolean
@@ -12,17 +21,40 @@ interface Props {
   rightInset: number
 }
 
+const COMPARE_LABEL: Record<CompareMode, string> = {
+  off: '对比',
+  picking: '选对比地点…',
+  on: '换对比地点',
+}
+
+const SIMULATE_LABEL: Record<SimulateMode, string> = {
+  off: '模拟新建',
+  on: '模拟中',
+  placing: '放置中…',
+}
+const SIMULATE_TITLE: Record<SimulateMode, string> = {
+  off: '假如在这里新建一处菜市场 / 药店 / 小学，分数和盲区会怎样变',
+  on: '模拟面板已打开，再点关闭',
+  placing: '正在放置：在地图上点一下落设施，再点关闭模拟',
+}
+
 /** 顶栏：品牌 + 工具按钮（贴右上，宽度自适应，不占满一行，让地图露出来） */
 export default function TopBar({
   canPrint,
-  showSamples,
-  onToggleSamples,
+  canCompare,
+  compare,
+  onCompare,
+  canSimulate,
+  simulate,
+  onSimulate,
   onPrint,
   notice,
   drawerOpen,
   onToggleDrawer,
   rightInset,
 }: Props) {
+  const compareActive = compare !== 'off'
+  const simActive = simulate !== 'off'
   return (
     <>
       <div
@@ -36,19 +68,44 @@ export default function TopBar({
           >
             圈见
           </span>
-          <span className="ml-3 border-l border-[var(--line-strong)] pl-3 text-xs text-[var(--ink-2)]">
+          <span
+            className={`ml-3 border-l border-[var(--line-strong)] pl-3 text-xs text-[var(--ink-2)] ${
+              compareActive || simActive ? 'hidden 2xl:inline' : ''
+            }`}
+          >
             15 分钟生活圈体检
           </span>
         </div>
-        <label className="panel pointer-events-auto flex cursor-pointer select-none items-center gap-1.5 border border-[var(--line-strong)] bg-[var(--paper)] px-2.5 text-xs text-[var(--ink-2)]">
-          <input
-            type="checkbox"
-            className="accent-[var(--teal)]"
-            checked={showSamples}
-            onChange={onToggleSamples}
-          />
-          采样点
-        </label>
+        <button
+          type="button"
+          className={`pointer-events-auto btn ${compareActive ? 'btn-primary' : ''}`}
+          onClick={onCompare}
+          disabled={!canCompare}
+          aria-pressed={compareActive}
+          title={
+            canCompare
+              ? compare === 'on'
+                ? '重新选一个对比地点'
+                : '和另一个小区 / 地址比一比谁更宜居'
+              : '完成一次体检后可对比'
+          }
+        >
+          <Icon name="compare" size={16} />
+          {COMPARE_LABEL[compare]}
+        </button>
+        <button
+          type="button"
+          className={`pointer-events-auto btn ${simActive ? 'btn-primary' : ''} ${
+            simulate === 'placing' ? 'ring-2 ring-[var(--vermilion)] ring-offset-1' : ''
+          }`}
+          onClick={onSimulate}
+          disabled={!canSimulate}
+          aria-pressed={simActive}
+          title={canSimulate ? SIMULATE_TITLE[simulate] : '完成一次体检后可模拟'}
+        >
+          <Icon name="pin" size={16} />
+          {SIMULATE_LABEL[simulate]}
+        </button>
         <button
           type="button"
           className="pointer-events-auto btn"
@@ -57,7 +114,7 @@ export default function TopBar({
           title={canPrint ? '打印或另存为 PDF' : '完成分析后可导出'}
         >
           <Icon name="printer" size={16} />
-          导出报告 PDF
+          导出 PDF
         </button>
         <button
           type="button"

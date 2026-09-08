@@ -19,7 +19,16 @@ export type {
   PlaceSearchNearbyParams,
   RouteMatrixCell,
   SuggestionItem,
+  WeatherParams,
 } from './client'
+export {
+  parseWeather,
+  walkComment,
+  weatherSummary,
+  normalizeWindClass,
+  formatUptime,
+  FORECAST_DAYS,
+} from './weather'
 export { BaiduApiError, BaiduConfigError, BaiduNetworkError, isRetryableError } from './errors'
 export { createLimiter, withRetry } from './limiter'
 export type { Limiter, LimiterOptions, RetryOptions } from './limiter'

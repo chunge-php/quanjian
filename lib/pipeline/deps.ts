@@ -15,6 +15,7 @@ import type {
   IsochroneSample,
   LngLat,
   Poi,
+  WeatherInfo,
 } from '@/lib/types'
 import { estimateWalkLocal } from './util'
 
@@ -59,6 +60,11 @@ export interface PipelineDeps {
   suggest?(query: string, region?: string): Promise<SuggestItem[]>
   /** 坐标 → 行政区地址 */
   reverseGeocode(p: LngLat): Promise<HealthReport['address']>
+  /**
+   * 中心点天气（可选）：优先按坐标查，adcode 仅作回退；无数据返回 null，失败抛异常。
+   * 流水线对其失败静默：不发 error 事件、不进 warnings、不计入 apiStats。
+   */
+  weather?(center: LngLat, adcode?: string): Promise<WeatherInfo | null>
   /** 生成等时圈采样点 */
   buildSamples(center: LngLat, opts: { bearings: number }): IsochroneSample[]
   /** 批量步行算路（origin → points），与 points 等长；失败抛异常 */
@@ -118,6 +124,7 @@ export async function defaultDeps(opts: { noCache?: boolean } = {}): Promise<Pip
     geocode: (address) => client.geocode(address),
     suggest: (q, region) => client.placeSuggestion(q, region),
     reverseGeocode: (p) => client.reverseGeocode(p),
+    weather: (center, adcode) => client.weather({ location: center, adcode }),
     buildSamples: (center, o) => iso.buildSamples(center, o),
     attachWalkTimes: (origin, points) => baidu.attachWalkTimes(client, origin, points),
     estimateWalk: (m) => {

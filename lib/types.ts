@@ -152,6 +152,46 @@ export interface HealthReport {
   /** 数据来源：live=实时调用 sample=内置样例 mixed=部分降级 */
   dataSource: 'live' | 'sample' | 'mixed'
   warnings: string[]
+  /** 中心点当前天气（百度国内天气查询；失败静默、不影响评分，可缺省） */
+  weather?: WeatherInfo
+}
+
+/** 未来某日天气预报（只保留报告用到的字段） */
+export interface WeatherForecastDay {
+  /** YYYY-MM-DD */
+  date: string
+  /** 星期几（中文，如"星期二"） */
+  week: string
+  /** 最高温 °C */
+  high: number
+  /** 最低温 °C */
+  low: number
+  /** 白天天气现象（如"多云"） */
+  text: string
+}
+
+/** 中心点实时天气 + 步行舒适度提示（来自百度天气查询 result.now / result.forecasts） */
+export interface WeatherInfo {
+  /** 天气现象（如"晴"、"多云"、"小雨"） */
+  text: string
+  /** 气温 °C */
+  tempC: number
+  /** 体感温度 °C */
+  feelsLikeC?: number
+  /** 相对湿度 % */
+  humidity?: number
+  /** 风向（如"东北风"） */
+  windDir?: string
+  /** 风力（已规范为"2 级" / "<3 级"） */
+  windClass?: string
+  /** 气象站数据更新时间（YYYY-MM-DD HH:mm） */
+  uptime?: string
+  /** 本次拉取时间 ISO（天气不计入 apiStats，用此字段标记时效） */
+  fetchedAt: string
+  /** 未来最多 3 天预报 */
+  forecast?: WeatherForecastDay[]
+  /** 步行舒适度一句话提示（中文，按温度 / 降水生成） */
+  walkComment: string
 }
 
 export interface ApiStats {

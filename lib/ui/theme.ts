@@ -170,24 +170,47 @@ export function categoryMarkerUrl(
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 }
 
-export function centerMarkerUrl(): string {
+/**
+ * 中心点十字标：单点模式朱砂无字；对比模式 A 青 / B 赭，圈里写槽位字母
+ */
+export function centerMarkerUrl(slot?: 'A' | 'B'): string {
+  const color =
+    slot === 'A' ? MAP_OVERLAY.teal : slot === 'B' ? MAP_OVERLAY.ochre : COLORS.vermilion
+  const core = slot
+    ? `<circle cx="22" cy="22" r="11" fill="${color}"/>` +
+      `<text x="22" y="27" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="15" fill="${COLORS.paper}">${slot}</text>`
+    : `<circle cx="22" cy="22" r="4" fill="${color}"/>`
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44">` +
-    `<circle cx="22" cy="22" r="17" fill="none" stroke="${COLORS.vermilion}" stroke-width="2"/>` +
-    `<circle cx="22" cy="22" r="4" fill="${COLORS.vermilion}"/>` +
-    `<path d="M22 1v10M22 33v10M1 22h10M33 22h10" stroke="${COLORS.vermilion}" stroke-width="2"/>` +
+    `<circle cx="22" cy="22" r="17" fill="none" stroke="${color}" stroke-width="2"/>` +
+    core +
+    `<path d="M22 1v10M22 33v10M1 22h10M33 22h10" stroke="${color}" stroke-width="2"/>` +
     `</svg>`
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 }
 
-export function sampleDotUrl(ok: boolean): string {
-  const c = ok ? COLORS.teal : COLORS.vermilion
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="${c}" opacity="0.85"/></svg>`
+/**
+ * 采样点：按步行分钟深浅着色（0′ 淡青 → 15′ 深青 → 更远墨绿），不可达朱砂。
+ * shade 取 0-4 五档，便于图标缓存。
+ */
+export function sampleDotUrl(shade: number | null): string {
+  const ramp = ['#7fc9c3', '#3fa39c', '#0e8c84', '#0b6660', '#083f3c']
+  const c = shade == null ? COLORS.vermilion : ramp[Math.max(0, Math.min(4, shade))]
+  const r = shade == null ? 3 : 2.4 + shade * 0.3
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="${r}" fill="${c}" opacity="0.9" stroke="${COLORS.paper}" stroke-width="0.8"/></svg>`
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+}
+
+/** 步行秒数 → 采样点色阶 0-4（≤5′ / ≤10′ / ≤15′ / ≤20′ / 更远） */
+export function sampleShade(walkSec: number | null): number | null {
+  if (walkSec == null) return null
+  const m = walkSec / 60
+  return m <= 5 ? 0 : m <= 10 ? 1 : m <= 15 ? 2 : m <= 20 ? 3 : 4
 }
 
 /** 地图叠加层用色：容器上有 saturate/sepia 滤镜把底图洗成纸色，叠加层色要预先加饱和以抵消 */
 export const MAP_OVERLAY = {
   teal: '#0e8c84',
   vermilion: '#d93314',
+  ochre: '#d59a1a',
 } as const
