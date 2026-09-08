@@ -3,7 +3,7 @@ import { useState } from 'react'
 import type { FacilityCategory } from '@/lib/types'
 import { FACILITY_CATEGORIES } from '@/lib/categories'
 import { CategoryIcon, Icon } from '@/components/Icon'
-import { blindSpotColor } from '@/lib/ui/theme'
+import { blindSpotColor, CATEGORY_COLOR } from '@/lib/ui/theme'
 import { isCategoryOn, isOnlyEssential, type LayerFilter } from '@/lib/ui/layerFilter'
 
 interface Props {
@@ -135,7 +135,7 @@ export default function MapLegend(p: Props) {
               )}
 
               <div className="mb-1.5 mt-2.5 flex items-center justify-between">
-                <p className="kicker">设施（深色 = 硬指标）</p>
+                <p className="kicker">设施（粗黑边 = 硬指标）</p>
                 {p.hasPois && (
                   <span className="flex gap-1">
                     <Chip on={allOn} onClick={p.onAllCategories}>
@@ -169,11 +169,10 @@ export default function MapLegend(p: Props) {
                         title={allOn ? `只看${c.label}` : on ? `隐藏${c.label}` : `显示${c.label}`}
                       >
                         <span
-                          className={`inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border ${
-                            c.essential
-                              ? 'border-[var(--vermilion)] bg-[var(--ink)] text-[var(--paper)]'
-                              : 'border-[var(--ink)] bg-[var(--paper)] text-[var(--ink)]'
+                          className={`inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border text-white ${
+                            c.essential ? 'border-2 border-[var(--ink)]' : 'border-white'
                           } ${on ? '' : 'opacity-40'}`}
+                          style={{ background: CATEGORY_COLOR[c.key] }}
                         >
                           <CategoryIcon category={c.key} size={10} />
                         </span>

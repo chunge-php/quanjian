@@ -146,26 +146,42 @@ export const ESSENTIAL_SET = new Set<FacilityCategory>(
 )
 
 /** 生成地图 Marker 用的 SVG data URL（硬指标：墨底纸线、大一号；其余：纸底墨线） */
+/** 十类设施各自一个鲜明主色（地图标记底色 + 图例），硬指标三类饱和度最高 */
+export const CATEGORY_COLOR: Record<FacilityCategory, string> = {
+  market: '#e0542c',
+  pharmacy: '#d6336c',
+  primary_school: '#2f5fd0',
+  kindergarten: '#f0a500',
+  clinic: '#16a085',
+  elderly: '#8e5bd9',
+  supermarket: '#f27f16',
+  park: '#45a049',
+  bus_stop: '#1aa0d8',
+  bank: '#8c6d3f',
+}
+
 export function categoryMarkerUrl(
   category: FacilityCategory,
   opts: { essential: boolean; dim: boolean }
 ): string {
   const { paths, circles = [] } = CATEGORY_ICON[category]
   const size = opts.essential ? 30 : 24
-  const bg = opts.essential ? COLORS.ink : COLORS.paper
-  const fg = opts.essential ? COLORS.paper : COLORS.ink
-  const border = opts.essential ? COLORS.vermilion : COLORS.ink
-  const opacity = opts.dim ? 0.42 : 1
+  const bg = CATEGORY_COLOR[category]
+  const fg = '#ffffff'
+  // 硬指标：墨色粗边 + 更大；其余：白边细框。圈外淡显。
+  const border = opts.essential ? COLORS.ink : '#ffffff'
+  const opacity = opts.dim ? 0.38 : 1
   const inner = size - 10
   const scale = inner / 24
   const offset = 5
   const body = `${paths.map((d) => `<path d="${d}"/>`).join('')}${circles
     .map(([cx, cy, r]) => `<circle cx="${cx}" cy="${cy}" r="${r}"/>`)
     .join('')}`
+  const r = opts.essential ? 7 : 6
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" opacity="${opacity}">` +
-    `<rect x="1" y="1" width="${size - 2}" height="${size - 2}" fill="${bg}" stroke="${border}" stroke-width="${opts.essential ? 2 : 1.2}"/>` +
-    `<g transform="translate(${offset} ${offset}) scale(${scale})" fill="none" stroke="${fg}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${body}</g>` +
+    `<rect x="1" y="1" width="${size - 2}" height="${size - 2}" rx="${r}" fill="${bg}" stroke="${border}" stroke-width="${opts.essential ? 2.2 : 1.5}"/>` +
+    `<g transform="translate(${offset} ${offset}) scale(${scale})" fill="none" stroke="${fg}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${body}</g>` +
     `</svg>`
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 }

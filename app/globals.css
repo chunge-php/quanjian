@@ -316,7 +316,9 @@ input {
 }
 
 /* 底图洗成图纸色：降饱和 + 轻微泛黄；叠加层颜色已预加饱和抵消 */
-.map-canvas {
+/* 纸色滤镜只加在底图瓦片的 canvas 上，标记/多边形等 DOM 覆盖物保持原色 */
+.map-canvas > div > canvas,
+.map-canvas canvas:first-of-type {
   filter: saturate(0.42) sepia(0.2) contrast(0.96);
 }
 
