@@ -2,9 +2,15 @@
 # 圈见 · 一键打包（Linux/macOS）：pack.sh <版本号>  →  dist/quanjian-<版本号>.zip
 # 产物是 Next.js standalone 运行包：服务器上只需 Node 20，不用 pnpm、不用重新构建。
 set -euo pipefail
-VER="${1:-}"
-[ -z "$VER" ] && { echo "用法: ./pack.sh <版本号>   例: ./pack.sh 0.1.0"; exit 1; }
 cd "$(dirname "$0")"
+# 版本号：给了就用并写回 package.json；不给就把 package.json 的补丁号 +1
+VER="${1:-}"
+if [ -z "$VER" ]; then
+  VER=$(node -e "const f='package.json';const p=require('./'+f);const v=p.version.split('.').map(Number);v[2]++;p.version=v.join('.');require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n');console.log(p.version)")
+  echo "==> 自动递增版本: $VER（已写回 package.json）"
+else
+  node -e "const f='package.json';const p=require('./'+f);p.version='$VER';require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
+fi
 [ -f .env.local ] || { echo "缺 .env.local（构建需要 NEXT_PUBLIC_BAIDU_BROWSER_AK）"; exit 1; }
 grep -q '^NEXT_PUBLIC_BAIDU_BROWSER_AK=' .env.local || { echo ".env.local 里没有 NEXT_PUBLIC_BAIDU_BROWSER_AK"; exit 1; }
 export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}"

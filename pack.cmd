@@ -1,10 +1,16 @@
 @echo off
 chcp 65001 >nul
 REM 圈见 · 一键打包（Windows）：pack <版本号>  →  dist\quanjian-<版本号>.zip
-setlocal
-set VER=%~1
-if "%VER%"=="" ( echo 用法: pack ^<版本号^>   例: pack 0.1.0 & exit /b 1 )
+setlocal EnableDelayedExpansion
 cd /d "%~dp0"
+REM 版本号：给了就用并写回 package.json；不给就把 package.json 的补丁号 +1
+set VER=%~1
+if "%VER%"=="" (
+  for /f "usebackq delims=" %%v in (`node -e "const f='package.json';const p=require('./'+f);const v=p.version.split('.').map(Number);v[2]++;p.version=v.join('.');require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n');console.log(p.version)"`) do set VER=%%v
+  echo ==^> 自动递增版本: !VER!（已写回 package.json）
+) else (
+  node -e "const f='package.json';const p=require('./'+f);p.version='%VER%';require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
+)
 if not exist .env.local ( echo 缺 .env.local（构建需要 NEXT_PUBLIC_BAIDU_BROWSER_AK） & exit /b 1 )
 findstr /b "NEXT_PUBLIC_BAIDU_BROWSER_AK=" .env.local >nul || ( echo .env.local 里没有 NEXT_PUBLIC_BAIDU_BROWSER_AK & exit /b 1 )
 echo ==^> 安装依赖 ^& 构建
