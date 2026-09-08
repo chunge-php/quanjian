@@ -15,7 +15,7 @@ export interface SuggestItem {
 }
 
 /**
- * 搜索框实时联想：输入 ≥2 字后防抖 280ms 调 /api/suggest，
+ * 搜索框实时联想：输入 ≥1 字后防抖 120ms 调 /api/suggest（中文输入法组合中不发），
  * 自动取消过期请求；enabled=false（mock 模式）时不发请求。region=当前城市时同城候选优先。
  */
 export function useSuggest(q: string, enabled: boolean, region?: string) {
@@ -25,7 +25,7 @@ export function useSuggest(q: string, enabled: boolean, region?: string) {
 
   useEffect(() => {
     const query = q.trim()
-    if (!enabled || query.length < 2) {
+    if (!enabled || query.length < 1) {
       setItems([])
       setLoading(false)
       return
@@ -46,7 +46,7 @@ export function useSuggest(q: string, enabled: boolean, region?: string) {
       } finally {
         if (id === seq.current) setLoading(false)
       }
-    }, 280)
+    }, 120)
     return () => {
       clearTimeout(t)
       ctrl.abort()

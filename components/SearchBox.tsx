@@ -55,9 +55,10 @@ export default function SearchBox({
   const [focused, setFocused] = useState(false)
   const [active, setActive] = useState(-1)
   const [picked, setPicked] = useState('') // 已点选候选后的文本，避免再次触发联想
+  const [composing, setComposing] = useState(false) // 中文输入法组合中（拼音未上屏）
   const wrapRef = useRef<HTMLDivElement>(null)
-  const suggest = useSuggest(q === picked ? '' : q, !mock && focused, region)
-  const showSuggest = focused && suggest.items.length > 0
+  const suggest = useSuggest(q === picked || composing ? '' : q, !mock && focused, region)
+  const showSuggest = focused && (suggest.items.length > 0 || suggest.loading)
 
   const pickSuggest = (it: SuggestItem) => {
     const label =
@@ -71,6 +72,8 @@ export default function SearchBox({
   }
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // 输入法组合中的回车是"上屏"，不是搜索
+    if (composing || e.nativeEvent.isComposing || e.keyCode === 229) return
     if (!showSuggest) return
     if (e.key === 'ArrowDown') {
       e.preventDefault()
@@ -131,7 +134,7 @@ export default function SearchBox({
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     const address = q.trim()
-    if (!address) return
+    if (!address || composing) return
     if (showSuggest && active >= 0) {
       pickSuggest(suggest.items[active])
       return
@@ -232,6 +235,11 @@ export default function SearchBox({
           }}
           onFocus={() => setFocused(true)}
           onKeyDown={onKeyDown}
+          onCompositionStart={() => setComposing(true)}
+          onCompositionEnd={(e) => {
+            setComposing(false)
+            setQ((e.target as HTMLInputElement).value)
+          }}
           maxLength={80}
           autoComplete="off"
           enterKeyHint="search"
@@ -286,6 +294,7 @@ export default function SearchBox({
       </form>
       {showSuggest && !samplesOpen && (
         <SuggestList
+          loading={suggest.loading}
           items={suggest.items}
           active={active}
           onHover={setActive}

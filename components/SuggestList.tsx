@@ -4,14 +4,15 @@ import { suggestSubtitle } from '@/lib/ui/useSuggest'
 
 interface Props {
   items: SuggestItem[]
+  loading?: boolean
   active: number
   onHover: (i: number) => void
   onPick: (it: SuggestItem) => void
 }
 
 /** 搜索框下方的实时联想列表（百度地点输入提示） */
-export default function SuggestList({ items, active, onHover, onPick }: Props) {
-  if (!items.length) return null
+export default function SuggestList({ items, loading, active, onHover, onPick }: Props) {
+  if (!items.length && !loading) return null
   return (
     <ul
       id="addr-suggest"
@@ -40,7 +41,9 @@ export default function SuggestList({ items, active, onHover, onPick }: Props) {
           </button>
         </li>
       ))}
-      <li className="px-3 pt-1 text-[11px] text-[var(--ink-3)]">↑↓ 选择 · 回车定位并体检</li>
+      <li className="px-3 pt-1 text-[11px] text-[var(--ink-3)]">
+        {loading && !items.length ? '联想中…' : '↑↓ 选择 · 回车定位并体检'}
+      </li>
     </ul>
   )
 }
