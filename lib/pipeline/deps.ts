@@ -76,7 +76,11 @@ export interface PipelineDeps {
   /** 点是否在环内 */
   pointInPolygon(p: LngLat, ring: [number, number][]): boolean
   /** 检索全部类别设施（半径米）；整体失败抛异常 */
-  searchFacilities(center: LngLat, radiusM: number): Promise<Poi[]>
+  searchFacilities(
+    center: LngLat,
+    radiusM: number,
+    onError?: (message: string) => void
+  ): Promise<Poi[]>
   /** 可选：按单类别检索，便于逐类降级；不提供时用 searchFacilities 整体检索 */
   searchCategory?(center: LngLat, radiusM: number, category: FacilityCategory): Promise<Poi[]>
   /** 盲区网格 */
@@ -134,7 +138,10 @@ export async function defaultDeps(opts: { noCache?: boolean } = {}): Promise<Pip
     },
     buildIsochrone: (center, samples) => iso.buildIsochrone(center, samples),
     pointInPolygon: (p, ring) => iso.pointInPolygon(p, ring),
-    searchFacilities: (center, radiusM) => baidu.searchFacilities(client, center, radiusM),
+    searchFacilities: (center, radiusM, onError) =>
+      baidu.searchFacilities(client, center, radiusM, undefined, {
+        onError: (meta, msg) => onError?.(`${meta.label}：${msg}`),
+      }),
     detectBlindSpots: (center, pois, isochrone) => report.detectBlindSpots(center, pois, isochrone),
     summarizeBlindSpots: (cells) => report.summarizeBlindSpots(cells),
     scoreCategories: (pois, isochrone) => report.scoreCategories(pois, isochrone),

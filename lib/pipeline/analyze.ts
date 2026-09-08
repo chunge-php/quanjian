@@ -214,19 +214,27 @@ async function stagePoiSearch(ctx: Ctx, center: LngLat): Promise<Poi[]> {
     if (results.every((r) => r.length === 0) && ctx.warnings.some((w) => w.includes('检索失败')))
       ctx.poiFailed = true
   } else {
+    const searchErrors: string[] = []
     try {
-      pois = await ctx.deps.searchFacilities(center, POI_SEARCH_RADIUS_M)
+      pois = await ctx.deps.searchFacilities(center, POI_SEARCH_RADIUS_M, (m) =>
+        searchErrors.push(m)
+      )
     } catch (e) {
       ctx.poiFailed = true
       degrade(ctx, `设施检索失败，全部类别按无设施处理：${errMsg(e)}`)
     }
-    // 真实层逐类吞错：一个设施都没有时视作检索失败（是否真失败由"算路也全失败"共同判定）
+    // 真实层逐类吞错：一个设施都没有时视作检索失败，把接口的真实报错说清楚
     if (pois.length === 0 && !ctx.poiFailed) {
       ctx.poiFailed = true
+      const first = searchErrors[0]
       degrade(
         ctx,
-        `周边 ${POI_SEARCH_RADIUS_M} 米内未检索到任何设施（可能是检索接口异常或该区域确实空白）`
+        first
+          ? `设施检索接口报错（${searchErrors.length} 类全部失败），例如「${first}」。${hintForApiError(first)}`
+          : `周边 ${POI_SEARCH_RADIUS_M} 米内未检索到任何设施（接口正常返回但为空，该区域可能确实空白）`
       )
+    } else if (searchErrors.length > 0) {
+      ctx.warnings.push(`${searchErrors.length} 类设施检索失败，已按无设施处理：${searchErrors[0]}`)
     }
   }
   // 补齐直线距离（真实层一般已填，防御一下）
@@ -499,4 +507,17 @@ function shoelaceKm2(pts: [number, number][]): number {
   }
   const deg2 = Math.abs(s) / 2
   return (deg2 * 111.32 * 111.32 * Math.cos(lat0)) as number
+}
+
+/** 根据百度接口报错给一句可操作的提示 */
+function hintForApiError(msg: string): string {
+  if (/服务被禁用|240/.test(msg))
+    return '这是浏览器端 AK 或未开通「地点检索」服务：BAIDU_SERVER_AK 必须填服务端类型的 AK，并在百度控制台勾选地点检索、批量算路等服务。'
+  if (/IP|白名单|211|校验/.test(msg))
+    return '服务端 AK 的 IP 白名单不含当前机器，去百度控制台改成 0.0.0.0/0 或加上本机 IP。'
+  if (/配额|302|限流|并发|401/.test(msg))
+    return '接口配额或并发超限：等一会儿再试，或在百度控制台查看今日配额。'
+  if (/AK|ak|无效|不存在|101|200/.test(msg))
+    return 'AK 无效：检查 .env 里 BAIDU_SERVER_AK 是否粘贴完整。'
+  return '请对照 .env.example 检查服务端 AK 与网络。'
 }

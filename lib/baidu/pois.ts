@@ -134,7 +134,8 @@ export async function searchFacilities(
   client: BaiduClient,
   center: LngLat,
   radiusM: number,
-  categories: FacilityCategoryMeta[] = FACILITY_CATEGORIES
+  categories: FacilityCategoryMeta[] = FACILITY_CATEGORIES,
+  opts: { onError?: (category: FacilityCategoryMeta, message: string) => void } = {}
 ): Promise<Poi[]> {
   const perCategory = await Promise.all(
     categories.map(async (meta) => {
@@ -145,7 +146,9 @@ export async function searchFacilities(
           radius: radiusM,
         })
         return raw.filter((p) => matchesCategory(p, meta)).map((p) => ({ p, meta }))
-      } catch {
+      } catch (e) {
+        // 单类别失败不影响其他类别，但把原因交给调用方（用户看到"0 个设施"时最需要的就是这句）
+        opts.onError?.(meta, e instanceof Error ? e.message : String(e))
         return [] as { p: BaiduPlaceResult; meta: FacilityCategoryMeta }[]
       }
     })
