@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>圈见 · 使用指南</title>
+<style>
+@page { size: A4 portrait; margin: 15mm 16mm 16mm; }
+:root {
+  --paper: #f3ede0; --paper-2: #ebe3d1; --paper-3: #e2d9c4;
+  --ink: #23261f; --ink-2: #4b4e45; --ink-3: #6f6b5f;
+  --line: #cbc1aa; --line-strong: #a89e86;
+  --teal: #1f6e6a; --teal-deep: #154f4c; --teal-tint: rgba(31,110,106,.14);
+  --vermilion: #c0391d; --vermilion-tint: rgba(192,57,29,.12);
+  --ochre: #b0801f; --moss: #4f7a3a;
+  --serif: 'Songti SC', 'STSong', 'SimSun', 'Noto Serif CJK SC', 'Noto Serif SC', 'Source Han Serif SC', serif;
+  --sans: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif;
+  --mono: 'SF Mono', Menlo, Consolas, 'Noto Sans Mono CJK SC', ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+html { background: #d8d2c4; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 10pt; line-height: 1.6;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+@media screen { body { max-width: 178mm; margin: 0 auto; padding: 15mm 16mm; box-shadow: 0 0 0 1px var(--line); } }
+@media print { html { background: var(--paper); } }
+
+.page { break-before: page; page-break-before: always; min-height: 248mm; display: flex; flex-direction: column; }
+.page.first { break-before: auto; page-break-before: auto; }
+.rh { display: flex; justify-content: space-between; font-size: 8pt; color: var(--ink-3); letter-spacing: .08em;
+  border-bottom: 1px solid var(--ink); padding-bottom: 3px; margin-bottom: 8mm; font-family: var(--mono); }
+.rf { margin-top: auto; padding-top: 4mm; border-top: 1px solid var(--line); display: flex; justify-content: space-between;
+  font-size: 7.5pt; color: var(--ink-3); font-family: var(--mono); }
+
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; line-height: 1.3; margin: 0; }
+h1 { font-size: 24pt; }
+h2 { font-size: 16pt; margin-bottom: 4mm; }
+h2 .no { font-family: var(--mono); font-size: 9pt; color: var(--teal); margin-right: 8px; letter-spacing: .1em; vertical-align: middle; }
+h3 { font-size: 11pt; margin: 3.5mm 0 1.5mm; padding-left: 8px; border-left: 3px solid var(--teal); }
+p { margin: 0 0 2mm; text-align: justify; }
+.lead { font-size: 10.5pt; color: var(--ink-2); }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.key { color: var(--vermilion); font-family: var(--mono); font-weight: 600; }
+.muted { color: var(--ink-3); font-size: 9pt; }
+.small { font-size: 9pt; }
+.avoid { break-inside: avoid; page-break-inside: avoid; }
+code, pre { font-family: var(--mono); font-size: 8.3pt; }
+code { background: rgba(255,255,255,.55); border: 1px solid var(--line); padding: 0 3px; border-radius: 2px; }
+pre { margin: 1.5mm 0 2mm; padding: 2mm 3mm; border: 1px solid var(--line-strong); border-left: 3px solid var(--teal); background: rgba(255,255,255,.5); white-space: pre-wrap; line-height: 1.55; break-inside: avoid; }
+pre .c { color: var(--ink-3); }
+
+figure { margin: 2.5mm 0 3mm; break-inside: avoid; page-break-inside: avoid; }
+figure img { display: block; max-width: 100%; max-height: 92mm; width: auto; height: auto; margin: 0 auto; border: 1px solid var(--line-strong); background: #fff; }
+figcaption { font-size: 8.5pt; color: var(--ink-3); margin-top: 1.5mm; line-height: 1.5; }
+figcaption b { color: var(--ink); font-weight: 600; }
+
+table { border-collapse: collapse; width: 100%; font-size: 8.6pt; line-height: 1.45; break-inside: avoid; page-break-inside: avoid; }
+th, td { border-bottom: 1px solid var(--line); padding: 3.5px 6px; text-align: left; vertical-align: top; }
+th { border-bottom: 1px solid var(--ink); font-weight: 600; font-size: 8.5pt; color: var(--ink-2); }
+td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+ul, ol { margin: 0 0 2.5mm; padding-left: 1.4em; }
+li { margin-bottom: 1mm; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+
+.step { display: grid; grid-template-columns: 9mm 1fr; gap: 2mm; margin-bottom: 2mm; break-inside: avoid; }
+.step .i { font-family: var(--mono); color: var(--teal); font-weight: 600; font-size: 12pt; line-height: 1.3; border-top: 1px solid var(--ink); }
+.step .t { border-top: 1px solid var(--line); padding-top: 1mm; }
+.step .t b { font-family: var(--serif); }
+
+.callout { border: 1px solid var(--ink); border-left: 4px solid var(--vermilion); padding: 2.5mm 3.5mm; margin: 2mm 0 3mm; font-size: 9.5pt; background: rgba(255,255,255,.35); break-inside: avoid; }
+.callout.teal { border-left-color: var(--teal); }
+.callout b:first-child { font-family: var(--serif); }
+
+/* 截图标注 */
+.annot { position: relative; }
+.annot .m { position: absolute; width: 6.5mm; height: 6.5mm; border-radius: 50%; background: var(--vermilion); color: #fff;
+  font-family: var(--mono); font-size: 9pt; font-weight: 600; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 1.5px #fff, 0 0 0 2.5px var(--vermilion); transform: translate(-50%, -50%); }
+.legend { display: grid; grid-template-columns: 1fr 1fr; gap: 1mm 5mm; font-size: 9.2pt; margin-top: 2mm; }
+.legend div { display: grid; grid-template-columns: 6mm 1fr; gap: 1.5mm; align-items: baseline; }
+.legend i { font-style: normal; font-family: var(--mono); color: var(--vermilion); font-weight: 600; }
+
+.faq dt { font-weight: 600; font-family: var(--serif); margin-top: 2.5mm; }
+.faq dt::before { content: 'Q · '; font-family: var(--mono); color: var(--teal); font-weight: 400; }
+.faq dd { margin: 0.5mm 0 0 0; font-size: 9.5pt; }
+.faq dl { margin: 0; }
+
+.cover { display: flex; align-items: flex-end; justify-content: space-between; border-bottom: 1px solid var(--ink); padding-bottom: 4mm; margin-bottom: 6mm; }
+.cover img { width: 62mm; }
+.cover .r { text-align: right; font-size: 9pt; color: var(--ink-3); font-family: var(--mono); line-height: 1.5; }
+.sw { display: inline-block; width: 9px; height: 9px; border: 1px solid var(--ink); vertical-align: -1px; margin-right: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ===================== 1 安装与启动 ===================== -->
+<section class="page first">
+  <div class="cover">
+    <img src="../../public/brand/logo-horizontal.svg" alt="圈见 QuanJian">
+    <div class="r">使用指南 · v0.1.0<br>github.com/chunge-php/quanjian<br>2026-09-08</div>
+  </div>
+  <h1>圈见 · 使用指南</h1>
+  <p class="lead" style="margin-top:2mm">面向普通用户与评委。从零启动约 3 分钟；没有百度 AK 也可以用内置样例走完全部场景。</p>
+
+  <h2 style="margin-top:3mm"><span class="no">01</span>安装与启动</h2>
+  <div class="cols">
+    <div>
+      <h3 style="margin-top:0">路线 A · Docker 一键（推荐）</h3>
+      <pre>git clone https://github.com/chunge-php/quanjian.git
+cd quanjian
+cp .env.example .env   <span class="c"># 填两个 AK，留空=样例</span>
+bash scripts/demo.sh   <span class="c"># Win: scripts\demo.cmd</span>
+<span class="c"># http://localhost:3010 ；停止 demo.sh down</span></pre>
+      <p class="small">或直接拉镜像 <code>ghcr.io/chunge-php/quanjian:latest</code>（-p 3010:3010，--env-file .env）。镜像不含 AK。</p>
+    </div>
+    <div>
+      <h3 style="margin-top:0">路线 B · 本地 pnpm</h3>
+      <pre>bash scripts/setup.sh  <span class="c"># 查 node>=20/pnpm，生成 .env.local</span>
+<span class="c"># 编辑 .env.local 填入 AK</span>
+pnpm dev               <span class="c"># http://localhost:3010</span>
+<span class="c"># 生产：pnpm build && pnpm start</span></pre>
+      <p class="small">启动后 <code>/api/health</code> 应返回 <code>{ ok: true }</code>；页面顶部出现黄色「样例模式」= 未读到服务端 AK。</p>
+    </div>
+  </div>
+
+  <h3>百度地图 AK 申请（5 步）</h3>
+  <div class="step"><div class="i">1</div><div class="t"><b>注册认证。</b>登录 lbsyun.baidu.com，完成开发者认证（个人开发者即可，免费配额足够体验）。</div></div>
+  <div class="step"><div class="i">2</div><div class="t"><b>进入控制台。</b>应用管理 → 我的应用 → 创建应用。</div></div>
+  <div class="step"><div class="i">3</div><div class="t"><b>创建服务端应用。</b>类型选「服务端」，启用地理编码、逆地理编码、地点检索、批量算路（天气、静态图可选）；IP 白名单填服务器出口 IP，本地体验可先填 <code>0.0.0.0/0</code>、上线前收紧。得到的 AK 填入 <code>BAIDU_SERVER_AK</code>。</div></div>
+  <div class="step"><div class="i">4</div><div class="t"><b>创建浏览器端应用。</b>类型选「浏览器端」，Referer 白名单填 <code>localhost:3010/*</code> 与你的域名。得到的 AK 填入 <code>NEXT_PUBLIC_BAIDU_BROWSER_AK</code>。</div></div>
+  <div class="step"><div class="i">5</div><div class="t"><b>看配额。</b>「配额管理」确认批量算路的每日调用量与并发；个人 AK 保持 <code>BAIDU_MAX_CONCURRENCY</code> 为 2–3，调大只会触发 401 限流。</div></div>
+
+  <h3>.env 里两个 AK 的区别</h3>
+  <table class="avoid">
+    <tr><th style="width:44mm">变量</th><th>在哪用</th><th>安全边界</th></tr>
+    <tr><td class="num">BAIDU_SERVER_AK</td><td>Node 进程内调地理编码 / 地点检索 / 批量算路</td><td>从不下发到浏览器、不进日志与 SSE；靠 IP 白名单保护</td></tr>
+    <tr><td class="num">NEXT_PUBLIC_BAIDU_BROWSER_AK</td><td>仅 JSAPI GL 渲染底图，会内联进前端 JS</td><td>必然公开，靠 Referer 白名单保护；被盗用会计入你的配额</td></tr>
+  </table>
+  <p class="muted" style="margin-top:1.5mm">两个 AK 必须是两个不同的应用。可选：<code>BAIDU_MAX_CONCURRENCY</code>（默认 3）、<code>BAIDU_QPS</code>（默认 20）、<code>ALLOW_SAMPLE_FALLBACK</code>（默认 true）。</p>
+  <div class="rf"><span>圈见 · 使用指南</span><span>01</span></div>
+</section>
+
+<!-- ===================== 2 界面总览 + 场景 1 ===================== -->
+<section class="page">
+  <div class="rh"><span>圈见 · 使用指南</span><span>02 · 界面总览 ／ 场景 1 · 单点体检</span></div>
+  <h2><span class="no">02</span>界面总览</h2>
+  <figure>
+    <div class="annot">
+      <img src="../images/screenshot.png" alt="主界面标注" style="max-height:96mm">
+      <span class="m" style="left:11%;top:3.5%">1</span>
+      <span class="m" style="left:45.5%;top:3.5%">2</span>
+      <span class="m" style="left:53.5%;top:3.5%">3</span>
+      <span class="m" style="left:63.5%;top:3.5%">4</span>
+      <span class="m" style="left:63%;top:83%">5</span>
+      <span class="m" style="left:72.6%;top:50%">6</span>
+      <span class="m" style="left:86%;top:16%">7</span>
+    </div>
+    <figcaption><b>图 1 · 主界面（示例：璧山区璧城街道广场南路，51 分 C 级）。</b></figcaption>
+  </figure>
+  <div class="legend avoid">
+    <div><i>1</i><span><b>搜索框</b>：输入地址 / 小区名，边输边联想（同城候选优先），↑↓ 选择、回车定位并体检；旁边「样例」下拉可直接加载内置样例。</span></div>
+    <div><i>2</i><span><b>顶栏</b>：圈见 · 15 分钟生活圈体检；单点完成后这里出现「对比」「模拟新建」「街道体检」入口。</span></div>
+    <div><i>3</i><span><b>采样点</b>开关：显示 112 个扇形采样点，颜色深浅 = 步行时长，用来看等时圈是怎么算出来的。</span></div>
+    <div><i>4</i><span><b>导出报告 PDF</b>：调用浏览器打印，详见场景 1 的注意事项。</span></div>
+    <div><i>5</i><span><b>地图图例</b>：兼图层筛选——等时圈三环、服务盲区（缺 1 → 3 类）、十类设施（深色方块 = 硬指标）。点类别可单选 / 多选。</span></div>
+    <div><i>6</i><span><b>抽屉拖宽把手</b>：右侧抽屉默认 400 px，按住左缘可拖到你需要的宽度；「›」收起。</span></div>
+    <div><i>7</i><span><b>报告抽屉</b>：从上到下依次是标题与评分、结论三条、十类雷达、最近步行分钟、硬指标卡、盲区、规划建议、等时圈、天气与 API 统计。</span></div>
+  </div>
+
+  <h2 style="margin-top:6mm"><span class="no">场景 1</span>单点体检</h2>
+  <div class="step"><div class="i">1</div><div class="t"><b>选点。</b>搜地址（如「重庆市璧山区璧城街道」）回车，或直接在地图上点一下，再按「体检」。</div></div>
+  <div class="step"><div class="i">2</div><div class="t"><b>看进度。</b>右侧依次：地理编码 → 扇形采样 → 批量算路 → 等时圈 → 设施检索 → 设施算路 → 评分 → 盲区。约 2 s 等时圈先画出来，6–8 s 报告完成；命中缓存时几十毫秒。</div></div>
+  <div class="step"><div class="i">3</div><div class="t"><b>读报告。</b>各节怎么看见下页表格；点地图上的盲区网格看缺失类别与建议补点方位，点设施图标看步行分钟与来源（真实算路 / 估算）。</div></div>
+  <div class="rf"><span>圈见 · 使用指南</span><span>02</span></div>
+</section>
+
+<!-- ===================== 3 导出 PDF + 场景 2 + 场景 3 ===================== -->
+<section class="page">
+  <div class="rh"><span>圈见 · 使用指南</span><span>场景 1（续） ／ 场景 2 · 两地对比</span></div>
+  <h3 style="margin-top:0">报告各节怎么看</h3>
+  <table class="avoid" style="margin-bottom:3mm">
+    <tr><th style="width:30mm">报告节</th><th>怎么看</th></tr>
+    <tr><td>综合评分 / 评级</td><td>0–100，硬指标占 60%、七类加分项 40%；A ≥ 85、B ≥ 70、C ≥ 50、D &lt; 50。菜市场 / 药店 / 小学任一为 D，综合最高 C。右上「实时 / 样例」标签是数据来源。</td></tr>
+    <tr><td>结论三条</td><td>① 等时圈面积、等效半径、圆度与最弱方向；② 硬指标 1 km 内是否达标；③ 盲区网格数与圈内数。</td></tr>
+    <tr><td>十类设施覆盖（雷达）</td><td>离外圈越近分越高；红字三类是硬指标。</td></tr>
+    <tr><td>最近步行分钟</td><td>每类最近一家走过去要几分钟，越短越好；朱砂竖线 = 15 分钟。斜纹柱表示 1.8 km 内一家都没有。</td></tr>
+    <tr><td>硬指标卡</td><td>圈有 / 圈外有 / 无，最近步行分钟与设施名。</td></tr>
+    <tr><td>服务盲区</td><td>200 m 网格、1 km 内缺硬指标；给出圈内盲区格、盲区面积、三项全缺格数，以及按网格数排的缺失类别。</td></tr>
+    <tr><td>规划建议</td><td>按优先级：优先（硬指标 D 或圈内盲区簇）、建议（非硬指标 D / 硬指标 C）、改善（圆度、数量）。每条旁有「去模拟」。</td></tr>
+    <tr><td>等时圈 / API 统计</td><td>三环面积与 16 方向可达半径；本次 geocode / 检索 / 算路次数、点对数、缓存命中、限流退避、耗时。</td></tr>
+  </table>
+  <div class="callout">
+    <b>导出 PDF 的注意事项。</b>点「导出报告 PDF」会打开浏览器打印对话框：目标选「另存为 PDF」，纸张 A4；<b>去掉「页眉和页脚」</b>（否则每页顶部会印上网址与时间）；<b>勾选「背景图形」</b>（否则纸底、评级色块、雷达填充全部丢失）。建议用桌面 Chrome / Edge。图表在报告出来时已离屏预生成，不必等待。PDF 详版比屏幕多出「怎么看」说明、十类明细表、设施清单、方法说明与图签。
+  </div>
+
+  <h2><span class="no">场景 2</span>两地对比</h2>
+  <div class="step"><div class="i">1</div><div class="t"><b>先做一次单点体检</b>，顶栏出现「对比」，点它进入对比模式，当前点成为 A。</div></div>
+  <div class="step"><div class="i">2</div><div class="t"><b>选 B。</b>搜地址或点地图，B 自动开始体检（与 A 串行，不会撞配额）。搜索框下方出现 A / B 两枚芯片，点谁就聚焦谁。</div></div>
+  <div class="step"><div class="i">3</div><div class="t"><b>读对比。</b>两圈同屏：未聚焦的一边只画 15 分钟外圈，设施与盲区只画聚焦一侧。抽屉内依次是综合评分（谁高谁标「更优」）、雷达叠加（A 实线青、B 虚线赭）、十类对照、硬指标、盲区与自动结论。「交换 A / B」「换对比地点」「移除对比」在抽屉顶部。</div></div>
+  <figure>
+    <img src="../images/compare.png" alt="两地对比" style="max-height:64mm">
+    <figcaption><b>图 2 · 东林大道（A，92）vs 秀湖公园（B，48）。</b>导出 PDF 时三段分页：对比视图 → A 完整报告 → B 完整报告。</figcaption>
+  </figure>
+
+  <div class="rf"><span>圈见 · 使用指南</span><span>03</span></div>
+</section>
+
+<!-- ===================== 4 场景 4 批量 ===================== -->
+<section class="page">
+  <div class="rh"><span>圈见 · 使用指南</span><span>场景 3 · 模拟新建 ／ 场景 4 · 街道级批量体检</span></div>
+  <h2><span class="no">场景 3</span>模拟新建</h2>
+  <div class="step"><div class="i">1</div><div class="t"><b>进入。</b>两个入口：顶栏「模拟新建」；或在规划建议某一条旁点「去模拟」，会直接带入该条建议的设施类别。</div></div>
+  <div class="step"><div class="i">2</div><div class="t"><b>放置。</b>左下面板选菜市场 / 药店 / 小学，进入放置模式后在地图上点一下即放一处（朱砂虚线标记 + 1 km 判定圈）；再点类别可退出放置。可放多处。</div></div>
+  <div class="step"><div class="i">3</div><div class="t"><b>看效果。</b>「效果对比」立即给出综合分与评级变化、盲区网格 / 圈内盲区消除数、受影响类别的分数与最近步行分钟变化，全部在浏览器本地重算，约 1 ms。「撤销」「清空」随时回退；「导出模拟结果到 PDF」打印的是模拟后的报告。</div></div>
+  <p class="muted">拟建设施只影响当前报告；重新体检或切换聚焦后拟建列表自动清空。</p>
+  <h2 style="margin-top:4mm"><span class="no">场景 4</span>街道级批量体检</h2>
+  <div class="step"><div class="i">1</div><div class="t"><b>画范围。</b>顶栏「街道体检」→ 选「圆形」（以当前中心为圆心拖半径，300–3000 m）或「框选」（在地图拖出矩形，对角线最多 6 km，超出会提示重画）。可给范围起名，用在报告标题里。</div></div>
+  <div class="step"><div class="i">2</div><div class="t"><b>定参数。</b>见下表；面板会实时显示「预计 N 个点，约 M 分钟」（每点按 6 秒估）。</div></div>
+  <div class="step"><div class="i">3</div><div class="t"><b>开始。</b>点位串行体检，地图上的圆标逐个从「待体检」变成带分数的评级色；右侧「点位排名」在第一个点出来后实时刷新。单点失败会标「失败」并跳过，不影响整批。</div></div>
+  <table class="avoid" style="margin:2mm 0 3mm">
+    <tr><th style="width:24mm">参数</th><th style="width:34mm">范围 / 默认</th><th>含义</th></tr>
+    <tr><td>点距</td><td class="num">200–1500 m / 500</td><td>网格点间距。500 m 约等于一个小区一个点；点距越小点越多、越慢。</td></tr>
+    <tr><td>最多点数</td><td class="num">1–25 / 16</td><td>超过时按点距自动稀疏化。</td></tr>
+    <tr><td>快速模式</td><td class="num">默认开</td><td>每点 8 方向 × 5 半径等时圈，省一半算路；关掉则 16 方向、更精细但慢一倍。</td></tr>
+    <tr><td>预计时长</td><td class="num">≈ 6 s × 点数</td><td>相邻点的设施检索大量命中缓存，实际通常更快；璧山 13 点实跑 57 s。</td></tr>
+  </table>
+  <div class="cols avoid" style="grid-template-columns: 88mm 1fr; gap:4mm; margin-top:2mm">
+    <div>  <figure style="margin:0">
+    <img src="../images/batch.png" alt="街道级批量体检" style="max-height:70mm">
+    <figcaption><b>图 3 · 东林大道周边 1500 m 圆，16 点，平均 68 分。</b>圆标颜色：<span class="sw" style="background:#1f6e6a"></span>A 优 ≥ 85　<span class="sw" style="background:#4f7a3a"></span>B 良 70–84　<span class="sw" style="background:#b0801f"></span>C 中 50–69　<span class="sw" style="background:#c0391d"></span>D 差 &lt; 50；圆越大分越高。悬停看地址与分数，点圆标看该点完整报告。</figcaption>
+  </figure>
+    </div>
+    <div>  <h3 style="margin-top:0">结果怎么读</h3>
+  <ul class="small" style="padding-left:1.2em;font-size:8.6pt">
+    <li><b>头部</b>：平均分与评级、范围面积、点数、最高 / 最低；一条色带显示优 / 良 / 中 / 差各几个点。</li>
+    <li><b>街道级结论</b>：如「小学覆盖最弱，只有 44% 的点位 15 分钟内能走到」「最差三点位于 …」，按十类可达占比与盲区数生成。</li>
+    <li><b>点位排名</b>：名次、地址、分数、菜 / 药 / 学三项最近步行分钟、圈内盲区格；每行「报告」打开该点完整报告。</li>
+    <li><b>热力图</b>：按分数着色的渐变叠加，看系统性缺口而非单点；「调整范围重跑」保留参数改范围。</li>
+    <li><b>导出街道报告 PDF</b>：含百度静态图（评级色多点标记）、排名表、十类可达占比、结论与数据来源；静态图不可用时自动略过。</li>
+  </ul>
+    </div>
+  </div>
+  <div class="rf"><span>圈见 · 使用指南</span><span>04</span></div>
+</section>
+
+<!-- ===================== 5 图例与筛选 + FAQ ===================== -->
+<section class="page">
+  <div class="rh"><span>圈见 · 使用指南</span><span>03 · 图例与筛选 ／ 04 · 常见问题</span></div>
+  <h2><span class="no">03</span>图例与筛选</h2>
+  <table class="avoid">
+    <tr><th style="width:30mm">图层</th><th>样式</th><th>可以做什么</th></tr>
+    <tr><td>步行等时圈</td><td>青色三环嵌套，15′ 最浅、5′ 最深</td><td>整体显示 / 隐藏；对比模式下 A 实线、B 虚线</td></tr>
+    <tr><td>采样点</td><td>小圆点，颜色深浅 = 步行时长；估算点为虚线</td><td>顶栏或图例开关，默认关</td></tr>
+    <tr><td>服务盲区</td><td>赭色 200 m 方格，缺 1 → 3 类颜色加深</td><td>开关；点格看缺失类别、严重度、建议补点方位</td></tr>
+    <tr><td>设施</td><td>方块图标，深色 = 硬指标，圈外设施淡显</td><td>点类别单选，再点多选；「全部」「只看硬指标」「只看 15 分钟圈内的设施」</td></tr>
+    <tr><td>拟建设施</td><td>朱砂虚线标记 + 1 km 判定圈</td><td>模拟模式；点标记可移除</td></tr>
+    <tr><td>街道体检点</td><td>评级色圆标，墨色虚线 = 体检范围</td><td>悬停看分数，点开报告；热力图开关</td></tr>
+  </table>
+
+  <h2 style="margin-top:6mm"><span class="no">04</span>常见问题</h2>
+  <div class="faq"><dl>
+    <dt>页面提示「连不上分析服务」怎么办？</dt>
+    <dd>前端对 <code>/api/health</code> 连续 3 次失败后会自动切到本地样例并提示。确认 3010 端口的服务已启动（Docker：<code>docker ps</code> 看 quanjian 容器是否 healthy；本地：<code>pnpm dev</code> 终端无报错），再刷新页面。</dd>
+    <dt>没有 AK 能体验吗？</dt>
+    <dd>能。两个 AK 都为空时进入「样例模式」，顶部黄条会明确提示，报告右上角标「样例」，内置重庆璧山·东林大道的单点样例与街道级样例，四个场景都能走完；但地图底图仍需浏览器端 AK，否则地图区域为空。</dd>
+    <dt>地图区域空白或报 Referer 错误？</dt>
+    <dd>浏览器端 AK 的 Referer 白名单没包含当前地址。到百度控制台给该应用加 <code>localhost:3010/*</code>（或你的域名），保存后刷新。</dd>
+    <dt>进度条显示「限流中，重试 n/3」或速度很慢？</dt>
+    <dd>百度 401 = 并发超限、302 = 配额超限。工具会自动指数退避（0.5 → 1 → 2 s）最多 3 次，一般都能成功；若持续出现，把 <code>BAIDU_MAX_CONCURRENCY</code> 降到 2。日配额耗尽时重试无效，报告会标注估算 / 降级，次日恢复或在控制台提升配额。</dd>
+    <dt>为什么有的设施是虚线、报告标「估算」？</dt>
+    <dd>该批算路失败时用直线 × 1.25 ÷ 1.2 m/s 估算，报告 dataSource 为 mixed 并在 warnings 说明；重新分析通常即可拿到真实算路。</dd>
+    <dt>手机上能用吗？</dt>
+    <dd>可以浏览：抽屉改为底部上滑，地图手势缩放。但导出 PDF、街道体检框选建议在桌面浏览器完成；手机浏览器打印不保证背景图形与分页。</dd>
+    <dt>同一个点第二次很快是正常的吗？</dt>
+    <dd>正常。API 响应有内存 1 小时 + 磁盘 7 天两级缓存（Docker 卷 data/cache），第二次几十毫秒。想强制重新调接口，重新分析时勾选「不用缓存」或删除对应缓存文件。</dd>
+  </dl></div>
+  <div class="rf"><span>圈见 · 使用指南</span><span>05</span></div>
+</section>
+
+<!-- ===================== 6 数据说明与免责 ===================== -->
+<section class="page">
+  <div class="rh"><span>圈见 · 使用指南</span><span>05 · 数据说明与免责</span></div>
+  <h2><span class="no">05</span>数据说明与免责</h2>
+  <table class="avoid">
+    <tr><th style="width:32mm">数据项</th><th>来源与口径</th><th style="width:52mm">已知限制</th></tr>
+    <tr><td>设施（POI）</td><td>百度地点检索，半径 1500 m、每类最多 3 页；经多关键词、去重、黑白名单清洗</td><td>存在滞后：新开、关门、搬迁可能未更新；名称歧义可能误检或漏检</td></tr>
+    <tr><td>步行距离与分钟</td><td>百度批量算路步行模式，按其路网与步速（≈ 1.16 m/s）</td><td>与单条路线规划的时长差平均 7.7%，方向一致（单条略慢）</td></tr>
+    <tr><td>等时圈</td><td>16 方向 × 7 半径采样 + 插值，非路网遍历</td><td>半径序列 750 → 1000 m 步长 250 m，绕行突变方向边界可偏 2–3 分钟</td></tr>
+    <tr><td>盲区</td><td>200 m 网格、1 km 直线内缺硬指标</td><td>用直线不用算路，是宏观判断；格心落在水体等不可建位置时仍会计入</td></tr>
+    <tr><td>评分</td><td>《社区生活圈规划技术指南》TD/T 1062-2021 建议服务半径分段打分；硬指标权重 2</td><td>不区分设施规模与质量（一家小药店与一家医院同分）</td></tr>
+    <tr><td>「估算」标记</td><td>算路失败时直线 × 1.25 ÷ 1.2 m/s，地图虚线、报告 dataSource=mixed</td><td>估算值不写缓存；重新分析可替换为真实算路</td></tr>
+    <tr><td>样例数据</td><td>本项目用 API 生成的派生结果（多边形、评分、脱敏 POI），仅供演示</td><td>非实时，不得用于生产分析</td></tr>
+    <tr><td>天气</td><td>百度天气 API，仅作步行舒适度提示</td><td>旁路功能，失败静默、不计入统计</td></tr>
+  </table>
+
+  <div class="callout teal" style="margin-top:5mm">
+    <b>免责。</b>圈见输出的评分、盲区与规划建议基于第三方地图数据与本项目算法的自动计算，仅供规划参考与初步筛查，不构成规划结论或选址依据；设施是否存在、是否营业，请以现场核实为准。使用本项目调用百度地图服务须遵守百度地图开放平台服务条款；AK 配额与费用由使用者承担。
+  </div>
+
+  <h3>隐私与缓存</h3>
+  <ul class="small">
+    <li>服务端不存储用户位置历史；缓存键是接口名 + 参数哈希，不关联用户，TTL 内存 1 小时、磁盘 7 天。</li>
+    <li>日志、SSE 事件、报告中的 apiStats 均不含 AK；提交 Issue 前请检查粘贴的 URL 是否带 <code>ak=</code>。</li>
+    <li>缓存目录 <code>data/cache/</code> 可随时整体删除，不影响功能。</li>
+  </ul>
+
+  <h3>更多资料</h3>
+  <table class="avoid">
+    <tr><td style="width:40mm" class="num">README.md</td><td>功能、部署、环境变量、AK 申请</td></tr>
+    <tr><td class="num">docs/技术设计文档.md</td><td>API 调用策略、等时圈算法（上）</td></tr>
+    <tr><td class="num">docs/技术设计文档-数据与评分.md</td><td>POI 清洗、盲区、评分、SSE、错误处理矩阵（下）</td></tr>
+    <tr><td class="num">docs/测试报告.md</td><td>璧山真实社区对比测试与复现脚本</td></tr>
+    <tr><td class="num">docs/print/作品介绍.html</td><td>大赛作品介绍（可打印）</td></tr>
+    <tr><td class="num">github.com/chunge-php/quanjian/issues</td><td>提问、报错、功能建议；安全问题见 SECURITY.md</td></tr>
+  </table>
+  <div class="rf"><span>圈见 · 使用指南 · MIT · 2026-09</span><span>06</span></div>
+</section>
+
+</body>
+</html>

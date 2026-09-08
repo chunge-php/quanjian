@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>圈见 · 作品介绍</title>
+<style>
+@page { size: A4 portrait; margin: 15mm 16mm 16mm; }
+:root {
+  --paper: #f3ede0; --paper-2: #ebe3d1; --paper-3: #e2d9c4;
+  --ink: #23261f; --ink-2: #4b4e45; --ink-3: #6f6b5f;
+  --line: #cbc1aa; --line-strong: #a89e86;
+  --teal: #1f6e6a; --teal-deep: #154f4c; --teal-tint: rgba(31,110,106,.14);
+  --vermilion: #c0391d; --vermilion-tint: rgba(192,57,29,.12);
+  --ochre: #b0801f; --moss: #4f7a3a;
+  --serif: 'Songti SC', 'STSong', 'SimSun', 'Noto Serif CJK SC', 'Noto Serif SC', 'Source Han Serif SC', serif;
+  --sans: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif;
+  --mono: 'SF Mono', Menlo, Consolas, 'Noto Sans Mono CJK SC', ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+html { background: #d8d2c4; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 10pt; line-height: 1.6;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+@media screen { body { max-width: 178mm; margin: 0 auto; padding: 15mm 16mm; box-shadow: 0 0 0 1px var(--line); } }
+@media print { html { background: var(--paper); } }
+
+.page { break-before: page; page-break-before: always; min-height: 248mm; display: flex; flex-direction: column; }
+.page.first { break-before: auto; page-break-before: auto; }
+.rh { display: flex; justify-content: space-between; font-size: 8pt; color: var(--ink-3); letter-spacing: .08em;
+  border-bottom: 1px solid var(--ink); padding-bottom: 3px; margin-bottom: 7mm; font-family: var(--mono); }
+.rf { margin-top: auto; padding-top: 4mm; border-top: 1px solid var(--line); display: flex; justify-content: space-between;
+  font-size: 7.5pt; color: var(--ink-3); font-family: var(--mono); }
+
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; line-height: 1.3; margin: 0; }
+h2 { font-size: 17pt; margin-bottom: 5mm; letter-spacing: .02em; }
+h2 .no { font-family: var(--mono); font-size: 9pt; color: var(--teal); margin-right: 8px; letter-spacing: .1em; vertical-align: middle; }
+h3 { font-size: 11pt; margin: 4mm 0 1.5mm; padding-left: 8px; border-left: 3px solid var(--teal); }
+p { margin: 0 0 2mm; text-align: justify; }
+.lead { font-size: 10.5pt; color: var(--ink-2); }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.key { color: var(--vermilion); font-family: var(--mono); font-weight: 600; }
+.teal { color: var(--teal); }
+.muted { color: var(--ink-3); font-size: 9pt; }
+.avoid { break-inside: avoid; page-break-inside: avoid; }
+
+figure { margin: 2.5mm 0 3mm; break-inside: avoid; page-break-inside: avoid; }
+figure img { display: block; max-width: 100%; max-height: 92mm; width: auto; height: auto; margin: 0 auto; border: 1px solid var(--line-strong); background: #fff; }
+figcaption { font-size: 8.5pt; color: var(--ink-3); margin-top: 1.5mm; line-height: 1.5; }
+figcaption b { color: var(--ink); font-weight: 600; }
+
+table { border-collapse: collapse; width: 100%; font-size: 8.6pt; line-height: 1.45; break-inside: avoid; page-break-inside: avoid; }
+th, td { border-bottom: 1px solid var(--line); padding: 3px 5px; text-align: left; vertical-align: top; }
+th { border-bottom: 1px solid var(--ink); font-weight: 600; font-size: 8.5pt; color: var(--ink-2); }
+td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+tr.sum td { border-top: 1px solid var(--ink); }
+
+ul { margin: 0 0 2.5mm; padding-left: 1.4em; }
+li { margin-bottom: 1mm; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+.cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4mm; }
+
+.stat { border-top: 1px solid var(--ink); padding-top: 2mm; }
+.stat .v { font-family: var(--mono); font-size: 17pt; white-space: nowrap; font-weight: 600; line-height: 1.1; color: var(--ink); }
+.stat .v.red { color: var(--vermilion); }
+.stat .l { font-size: 8.5pt; color: var(--ink-3); margin-top: 1mm; }
+
+.card { border: 1px solid var(--line-strong); padding: 2.5mm 3.5mm; background: rgba(255,255,255,.35); break-inside: avoid; }
+.card h4 { margin: 0 0 1.5mm; font-size: 10.5pt; font-family: var(--serif); }
+.card h4 .k { font-family: var(--mono); font-size: 8pt; color: var(--teal); margin-right: 6px; }
+.card p { margin: 0; font-size: 9pt; line-height: 1.55; }
+
+/* 分层架构图 */
+.arch { display: grid; grid-template-columns: 26mm 1fr; border: 1px solid var(--ink); }
+.arch .lt { padding: 2mm; border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); font-family: var(--serif); font-size: 10pt; font-weight: 600; background: var(--paper-2); }
+.arch .lt small { display: block; font-family: var(--mono); font-weight: 400; font-size: 7.5pt; color: var(--ink-3); letter-spacing: .05em; }
+.arch .lb { padding: 2mm; border-bottom: 1px solid var(--ink); display: flex; flex-wrap: wrap; gap: 2mm; align-items: center; }
+.arch .lt:last-of-type, .arch .lb:last-of-type { border-bottom: 0; }
+.chip { border: 1px solid var(--ink); padding: .8mm 2mm; font-size: 8pt; line-height: 1.35; background: #fff; }
+.chip b { display: block; font-weight: 600; }
+.chip small { color: var(--ink-3); font-size: 7.5pt; }
+.chip.teal { border-color: var(--teal); background: var(--teal-tint); }
+.chip.fn { border-style: dashed; }
+.arrow { font-family: var(--mono); color: var(--teal); font-size: 12pt; }
+
+/* 数据流 */
+.flow { display: flex; align-items: stretch; gap: 0; margin: 2mm 0 3mm; }
+.flow .s { flex: 1; border: 1px solid var(--ink); padding: 1.5mm 2mm; font-size: 8.5pt; line-height: 1.4; background: #fff; position: relative; }
+.flow .s b { display: block; font-family: var(--serif); font-size: 9.5pt; }
+.flow .s small { color: var(--ink-3); font-family: var(--mono); font-size: 7.5pt; }
+.flow .a { width: 5mm; display: flex; align-items: center; justify-content: center; color: var(--teal); font-family: var(--mono); }
+
+/* 封面 */
+.cover { min-height: 262mm; display: flex; flex-direction: column; }
+.cover .logo { width: 82mm; margin: 6mm 0 22mm; }
+.cover h1 { font-size: 30pt; line-height: 1.25; letter-spacing: .02em; }
+.cover .sub { font-size: 14pt; font-family: var(--serif); color: var(--ink-2); margin-top: 3mm; }
+.cover .one { margin: 10mm 0 12mm; padding: 4mm 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); font-size: 11.5pt; }
+.cover .meta { font-size: 10pt; }
+.cover .meta td { padding: 1.2mm 0; border: 0; }
+.cover .meta td:first-child { width: 22mm; color: var(--ink-3); font-family: var(--mono); font-size: 8.5pt; letter-spacing: .08em; }
+.cover .kpis { margin-top: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4mm; }
+
+.rubric td:first-child { width: 34mm; font-weight: 600; }
+.ok { font-family: var(--mono); color: var(--teal); }
+.small { font-size: 9pt; }
+</style>
+</head>
+<body>
+
+<!-- ===================== 封面 ===================== -->
+<section class="page first cover">
+  <img class="logo" src="../../public/brand/logo-horizontal.svg" alt="圈见 QuanJian">
+  <h1>圈见</h1>
+  <div class="sub">基于百度地图开放能力的「15 分钟生活圈」智能体检与规划助手</div>
+  <div class="one">点一个地方，<span class="num">15</span> 秒内告诉你这里的 15 分钟生活圈<b>缺什么、缺在哪、该往哪补</b>。等时圈来自真实路网算路，不是直线圆。</div>
+  <table class="meta">
+    <tr><td>大赛</td><td>2026 上海开源软件应用创新大赛（开源中国主办）</td></tr>
+    <tr><td>赛道</td><td>开源 AI 工具赛道</td></tr>
+    <tr><td>赛题</td><td>百度地图企业赛题《基于地图开放能力的“15 分钟生活圈”智能体检与规划助手》</td></tr>
+    <tr><td>团队</td><td>个人开发者 · 叶春（Ye Chun，GitHub @chunge-php）</td></tr>
+    <tr><td>仓库</td><td class="num">github.com/chunge-php/quanjian</td></tr>
+    <tr><td>许可证</td><td>MIT · 依赖仅含 MIT / Apache-2.0</td></tr>
+    <tr><td>版本</td><td class="num">v0.1.0 · 2026-09-08</td></tr>
+  </table>
+  <div class="kpis">
+    <div class="stat"><div class="v red">43.5%</div><div class="l">实测 15 分钟等时圈面积 ÷ 1080 m 直线圆</div></div>
+    <div class="stat"><div class="v">6.5 s → 25 ms</div><div class="l">一次完整体检，冷缓存 → 热缓存</div></div>
+    <div class="stat"><div class="v">10 类</div><div class="l">民生设施，3 类硬指标一票否决</div></div>
+    <div class="stat"><div class="v">163</div><div class="l">Vitest 单元测试 · CI 五步全绿</div></div>
+  </div>
+  <div class="rf"><span>圈见 · 作品介绍</span><span>封面</span></div>
+</section>
+
+<!-- ===================== 一 ===================== -->
+<section class="page">
+  <div class="rh"><span>圈见 · 作品介绍</span><span>一 · 项目背景与痛点</span></div>
+  <h2><span class="no">01</span>项目背景与痛点</h2>
+  <p class="lead">「15 分钟社区生活圈」已从上海的城市实践上升为国家技术标准，但基层街道和普通居民手里，至今没有一件能把「走 15 分钟能到哪、缺什么」算清楚的工具。</p>
+
+  <h3>政策要求越来越具体，工具却停留在直线圆</h3>
+  <p>上海 2016 年在《上海市 15 分钟社区生活圈规划导则》中率先提出这一概念；2021 年自然资源部发布《社区生活圈规划技术指南》（TD/T 1062-2021），对菜市场、药店、小学等设施给出了明确的服务半径；「十四五」规划纲要把「完整社区」「15 分钟生活圈」写进了城市更新任务。要求已细到每类设施的步行距离，但常见的评估办法仍是以中心点画一个 1000 m 或 1080 m（1.2 m/s × 15 min）的直线圆，数圆内有几家。</p>
+
+  <h3>道路不是直线</h3>
+  <p>河流、铁路、封闭小区、立交与快速路，会让「直线 1 公里」变成「步行 25 分钟」。我们在重庆璧山·璧城街道东林大道用百度批量算路实测了 112 个采样点，结果如下：</p>
+  <div class="cols3" style="margin:3mm 0 4mm">
+    <div class="stat"><div class="v">1.59 km²</div><div class="l">15 分钟真实步行等时圈面积；1080 m 直线圆为 3.66 km²</div></div>
+    <div class="stat"><div class="v red">+130%</div><div class="l">直线圆对可达面积的高估幅度（等效半径 712 m vs 1080 m）</div></div>
+    <div class="stat"><div class="v red">90 / 190</div><div class="l">直线圆内 190 个设施，有 90 个（47%）真实步行超过 15 分钟</div></div>
+  </div>
+  <table class="avoid">
+    <tr><th>方向</th><th class="n">15 分钟可达半径</th><th class="n">相对 1080 m 收缩</th><th>说明</th></tr>
+    <tr><td>正南 180°</td><td class="n">887 m</td><td class="n">17.9%</td><td>通畅方向，750 m 采样点绕行比 1.16</td></tr>
+    <tr><td>西南 225°</td><td class="n">506 m</td><td class="n">53.1%</td><td>需绕秀湖公园水体，750 m 采样点绕行比 2.17</td></tr>
+    <tr><td>16 方向平均</td><td class="n">717 m</td><td class="n">33.6%</td><td>同一个中心点，不同方向差 1.75 倍</td></tr>
+  </table>
+  <p class="muted" style="margin-top:2mm">数据来源：docs/测试报告.md §1，脚本 scripts/verify-report.ts 可复现。同一直线距离 1060 m 的「向阳菜市场」，真实步行 1604 m / 22.9 分钟。</p>
+
+  <h3>传统普查慢、贵、更新不了</h3>
+  <p>做一次街道级设施普查，通常要 GIS 团队、完整路网数据（几十 MB 级）和实地踏勘，周期以周计；设施新开、关门之后，很难有人再跑一遍。而居民要的只是一句话：<b>这里缺什么、缺在哪、该往哪补。</b></p>
+
+  <h3>我们要解决的三件事</h3>
+  <ul>
+    <li><b>不要直线圆</b>：等时圈必须来自真实路网步行时长，但不下载路网数据，只用地图开放 API。</li>
+    <li><b>不要只给分数</b>：识别服务盲区的位置与严重度，给出「往哪个方向、补什么」的规划建议，并能在图上模拟「新建一处」的效果。</li>
+    <li><b>不要只能看一个点</b>：两地对比、街道级批量体检，让规划部门与居民都用得上。</li>
+  </ul>
+  <div class="rf"><span>github.com/chunge-php/quanjian · MIT</span><span>01</span></div>
+</section>
+
+<!-- ===================== 二（1/3）===================== -->
+<section class="page">
+  <div class="rh"><span>圈见 · 作品介绍</span><span>二 · 产品是什么</span></div>
+  <h2><span class="no">02</span>产品是什么</h2>
+  <p class="lead"><b>圈见</b>是一个开源的 Web 工具：在地图上搜地址或点一下，服务端调用百度地图开放 API 生成真实步行等时圈、体检 10 类民生设施、扫描服务盲区，并以 SSE 流式返回一份带评分、建议和 API 调用统计的报告；报告可两地对比、可模拟新建、可对整条街道批量体检、可导出 PDF。</p>
+  <figure>
+    <img src="../images/screenshot.png" alt="圈见主界面">
+    <figcaption><b>图 1 · 主界面。</b>左侧百度 JSAPI GL 地图：5 / 10 / 15 分钟三环嵌套等时圈（青色）、十类设施图标（深色方块为硬指标）、服务盲区网格（赭色，深浅为严重度）、图例兼图层筛选；右侧抽屉：综合评分 51 / C、三条结论、十类雷达、最近步行分钟（朱砂线 = 15 分钟）。示例点：重庆璧山区璧城街道广场南路。</figcaption>
+  </figure>
+  <div class="cols">
+    <div class="card"><h4><span class="k">能力 1</span>真实路网等时圈</h4><p>16 方向 × 7 半径共 112 个采样点交给百度批量算路取真实步行时长，单调修正 + 线性插值 + 圆周平滑，输出 5 / 10 / 15 分钟三环嵌套多边形。不需要底层路网数据，河流、铁路、封闭小区造成的阻隔直接表现为该方向半径收缩；圆度指标 4πA/P² 量化阻隔程度。</p></div>
+    <div class="card"><h4><span class="k">能力 2</span>十类设施体检</h4><p>菜市场、药店、小学（硬指标）＋幼儿园、社区医疗、养老服务、超市便利店、公园绿地、公交地铁站、银行网点。多关键词检索、uid 去重、名称 / tag 黑白名单清洗后批量算路取步行分钟，按 TD/T 1062-2021 服务半径打分；硬指标任一为 D，综合评级最高 C。</p></div>
+  </div>
+  <div class="rf"><span>github.com/chunge-php/quanjian · MIT</span><span>02</span></div>
+</section>
+
+<!-- ===================== 二（2/3）===================== -->
+<section class="page">
+  <div class="rh"><span>圈见 · 作品介绍</span><span>二 · 产品是什么（续）</span></div>
+  <figure>
+    <img src="../images/compare.png" alt="两地对比" style="max-height:86mm">
+    <figcaption><b>图 2 · 两地对比。</b>A 东林大道 92 分（A 级）vs B 秀湖公园 48 分（D 级），双圈同屏、聚焦切换，抽屉内分数 / 雷达叠加 / 十类对照 / 硬指标 / 盲区逐项左右对照，结论按分差自动生成：「A 综合高 44 分，差距主要来自小学、幼儿园、药店」。</figcaption>
+  </figure>
+  <div class="cols">
+    <div class="card"><h4><span class="k">能力 3</span>盲区识别</h4><p>中心 ±1500 m 铺 200 m 网格（15 × 15 = 225 格，裁圆后 177 格），每格检查 1 km 内是否有全部三类硬指标，缺失数 ÷ 3 = 严重度；圈内盲区优先，4-连通合并成簇，取簇质心到最近已有设施的反方向作为建议补点方位。点击网格即可看缺失类别与建议。</p></div>
+    <div class="card"><h4><span class="k">能力 4</span>两地对比</h4><p>A / B 两个槽位共用一条分析流，天然串行、不会把配额打爆；对比视图只读两份报告做纯函数对照，不再调任何接口。适合居民选房、规划部门比较两个候选地块。导出 PDF 时三段分页：对比视图 → A 完整报告 → B 完整报告。</p></div>
+  </div>
+  <figure style="margin-top:4mm">
+    <img src="../images/simulate.png" alt="模拟新建" style="max-height:86mm">
+    <figcaption><b>图 3 · 模拟新建。</b>「假如在秀湖公园西侧新建一处小学」：地图放置拟建设施（朱砂虚线 + 1 km 判定圈），浏览器本地约 1 ms 重算——综合 48 → 71（D → B），盲区网格 78 → 40，圈内盲区 20 → 0，小学最近步行 25 → 5 分钟。规划建议旁「去模拟」一键直达。</figcaption>
+  </figure>
+  <div class="rf"><span>github.com/chunge-php/quanjian · MIT</span><span>03</span></div>
+</section>
+
+<!-- ===================== 二（3/3）===================== -->
+<section class="page">
+  <div class="rh"><span>圈见 · 作品介绍</span><span>二 · 产品是什么（续）</span></div>
+  <figure>
+    <img src="../images/batch.png" alt="街道级批量体检" style="max-height:88mm">
+    <figcaption><b>图 4 · 街道级批量体检。</b>在地图上画圆或框选范围，按点距自动铺点并逐点体检：每个点按评级着色（A 青、B 苔、C 赭、D 朱砂），右侧给出平均分、优良中差分布、十类可达占比、点位排名、最差三点与街道级结论；可切热力图，可导出街道报告 PDF。</figcaption>
+  </figure>
+  <div class="cols">
+    <div class="card"><h4><span class="k">能力 5</span>模拟新建</h4><p>拟建设施只是一个 uid 以 <span class="num">virtual:</span> 开头的 POI，并入原报告后在浏览器本地重跑评分 / 盲区 / 建议，幂等、不改入参；服务端只在放置时被调一次单对算路。前后对比面板给出分数、盲区、受影响类别的变化，可撤销、可清空、可导出模拟结果 PDF。</p></div>
+    <div class="card"><h4><span class="k">能力 6</span>街道级批量体检</h4><p>圆形半径 300–3000 m 或矩形对角线 ≤ 6 km，点距 200–1500 m，最多 25 点，串行逐点调用同一条流水线；整批共用一个 API 客户端，相邻点位的 POI 检索大量命中缓存。快速模式 8 方向 × 5 半径（40 采样点）省一半算路，默认开启。</p></div>
+  </div>
+  <div class="cols" style="margin-top:4mm">
+    <figure style="margin:0">
+      <img src="../images/compare-pdf-p1.png" alt="对比 PDF 第 1 页" style="max-height:80mm">
+      <figcaption><b>图 5a · 对比报告 PDF 第 1 页。</b>百度静态图 + 圈内硬指标设施、综合评分左右对照。</figcaption>
+    </figure>
+    <figure style="margin:0">
+      <img src="../images/compare-pdf-p2.png" alt="对比 PDF 第 2 页" style="max-height:80mm">
+      <figcaption><b>图 5b · 第 2 页。</b>雷达叠加、每类两根柱的最近步行分钟；每张图下方都有一段「怎么看」说明。</figcaption>
+    </figure>
+  </div>
+  <div class="rf"><span>github.com/chunge-php/quanjian · MIT</span><span>04</span></div>
+</section>
+
+<!-- ===================== 三 ===================== -->
+<section class="page">
+  <div class="rh"><span>圈见 · 作品介绍</span><span>三 · 技术架构</span></div>
+  <h2><span class="no">03</span>技术架构</h2>
+  <p>整体是一个 Next.js 14 应用（Node 20，standalone 输出，端口 3010）：浏览器只拿带 Referer 白名单的浏览器端 AK 渲染地图；所有 Web 服务 API 调用都在 Node 侧用服务端 AK 发起。坐标系全程 BD-09，不转换。</p>
+
+  <div class="arch avoid">
+    <div class="lt">前端<small>Browser</small></div>
+    <div class="lb">
+      <div class="chip"><b>Next.js 14 App Router</b><small>React 18 · TypeScript · Tailwind</small></div>
+      <div class="chip"><b>百度 JSAPI GL</b><small>等时圈 / POI / 盲区 / 拟建 / 批量点 图层</small></div>
+      <div class="chip"><b>ECharts 5</b><small>雷达图 · 步行分钟柱图 · 打印离屏预生成</small></div>
+      <div class="chip"><b>EventSource</b><small>订阅 SSE，等时圈先画、POI 逐类落图</small></div>
+      <div class="chip fn"><b>lib/ui</b><small>对比 · 模拟 · 槽位（纯函数，本地重算）</small></div>
+    </div>
+    <div class="lt">服务端<small>Route Handlers</small></div>
+    <div class="lb">
+      <div class="chip teal"><b>POST /api/analyze</b><small>text/event-stream · zod 校验</small></div>
+      <div class="chip teal"><b>POST /api/batch</b><small>街道级批量 · plan / progress / point / done</small></div>
+      <div class="chip teal"><b>/api/walk · /api/health</b><small>单对算路 · 健康检查</small></div>
+      <div class="chip"><b>lib/pipeline</b><small>阶段编排 → AnalyzeEvent 流</small></div>
+      <div class="chip"><b>lib/baidu</b><small>令牌桶 · 并发窗口 · 指数退避 · 两级缓存 · 降级</small></div>
+    </div>
+    <div class="lt">算法层<small>Pure functions</small></div>
+    <div class="lb">
+      <div class="chip fn"><b>lib/isochrone</b><small>扇形采样 · 单调修正 · 插值 · 平滑 · 几何</small></div>
+      <div class="chip fn"><b>lib/report</b><small>POI 清洗 · 评分 · 盲区网格 · 建议文案</small></div>
+      <div class="chip fn"><b>lib/batch</b><small>布点 · 串行执行 · 汇总排名</small></div>
+      <div class="chip fn"><b>lib/types · lib/categories</b><small>全局契约 · 10 类定义与服务半径</small></div>
+    </div>
+    <div class="lt">百度地图<small>Web 服务 API</small></div>
+    <div class="lb">
+      <div class="chip"><b>地理编码</b><small>geocoding/v3</small></div>
+      <div class="chip"><b>逆地理编码</b><small>reverse_geocoding/v3</small></div>
+      <div class="chip"><b>地点检索</b><small>place/v2/search · scope=2</small></div>
+      <div class="chip"><b>批量算路</b><small>routematrix/v2/walking</small></div>
+      <div class="chip"><b>轻量路线规划</b><small>directionlite/v1/walking（单对）</small></div>
+      <div class="chip"><b>天气 · 静态图</b><small>weather/v1 · staticimage/v2（旁路，失败静默）</small></div>
+    </div>
+  </div>
+
+  <h3>数据流</h3>
+  <div class="flow avoid">
+    <div class="s"><b>采样</b>16 方向 × 7 半径<small>112 点，本地 1 ms</small></div><div class="a">→</div>
+    <div class="s"><b>批量算路</b>≤ 100 对 / 批<small>3 批，并发 2</small></div><div class="a">→</div>
+    <div class="s"><b>插值</b>单调修正 → 线性插值 → 平滑<small>partial:isochrone</small></div><div class="a">→</div>
+    <div class="s"><b>POI 清洗</b>10 类 22 页检索<small>去重 / 黑白名单 / 预筛</small></div><div class="a">→</div>
+    <div class="s"><b>评分</b>类别分 → 加权综合<small>硬指标一票否决</small></div><div class="a">→</div>
+    <div class="s"><b>盲区</b>200 m 网格<small>done:report</small></div>
+  </div>
+  <p class="small">SSE 事件顺序：stage（进度）→ partial:isochrone（地图先画三环）→ partial:pois（逐类落图）→ done:report（评分卡 + apiStats）。15 s 无事件发 ping 保活；客户端中止时服务端取消未发出的批次，已取得的结果照常写缓存。</p>
+
+  <h3>限流、缓存与降级</h3>
+  <div class="cols3 avoid">
+    <div class="card"><h4>限流退避</h4><p>令牌桶（QPS 默认 20，可配）+ 并发窗口（默认 2–3）所有接口共享；401 / 302 / 429 / 5xx 指数退避 500 ms → 1 s → 2 s 最多 3 次；参数错误与 AK 无效不重试。</p></div>
+    <div class="card"><h4>两级缓存</h4><p>L1 进程内 LRU 500 条 / 1 h；L2 磁盘 <span class="num">data/cache/&lt;接口&gt;/&lt;sha1&gt;.json</span> 7 天，Docker 卷挂载。参数规范化（坐标 5 位小数、关键词排序），只缓存 status=0，降级结果不写缓存。</p></div>
+    <div class="card"><h4>四级降级链</h4><p>真实算路 → 直线 × 1.25 ÷ 1.2 m/s 估算 → 上次缓存 POI → 内置样例。每个点记录 source: api | estimate，前端虚线区分；报告 dataSource 为 live / mixed / sample 并逐条 warnings。</p></div>
+  </div>
+  <div class="rf"><span>github.com/chunge-php/quanjian · MIT</span><span>05</span></div>
+</section>
+
+<!-- ===================== 四 ===================== -->
+<section class="page" style="font-size:9.6pt">
+  <div class="rh"><span>圈见 · 作品介绍</span><span>四 · 核心算法与创新点</span></div>
+  <h2><span class="no">04</span>核心算法与创新点</h2>
+
+  <h3>1 · 扇形采样 + 空间插值，不取路网</h3>
+  <p>传统等时圈（OSRM / Valhalla）需要完整路网做 Dijkstra。我们换个问法：百度已经在它的路网上算好了任意两点的步行时长，只需<b>在合适的位置提问</b>。以中心为原点向 16 个方位角各铺 7 个半径（250 → 1800 m）的采样点，112 个 O-D 对 3 次调用取回真实时长；同一方向做累积最大值的<b>单调修正</b>，不可达点截断；在相邻半径间对 300 / 600 / 900 s 做<b>线性插值</b>得可达半径，环形三点加权平滑（0.25 / 0.5 / 0.25）后按 r5 ≤ r10 ≤ r15 约束输出三环。</p>
+
+  <h3>2 · 批量距离矩阵：实测上限而非文档抄录</h3>
+  <p>我们对 routematrix 做了 11 组实测（见 <span class="num">lib/baidu/LIMITS.md</span>）：限制的是 <b>origins × destinations ≤ 100 对</b>（1 × 100 成功、1 × 101 报 status 2、2 × 51 失败），与 destinations 单独数量无关；单次请求 ≈ 0.9 s 且 10–100 对差别不大，所以点对越满越划算。并发方面 401「并发超限」在并发 ≥ 3 时稳定触发、并发 2 偶发，因此默认并发 2，再加退避兜底。批次间并发提交但按提交顺序合并，保证 samples[i] 与 destinations[i] 对齐。</p>
+
+  <h3>3 · 多源 POI 清洗规则</h3>
+  <table class="avoid">
+    <tr><th>步骤</th><th>规则</th><th>璧山实测</th></tr>
+    <tr><td>多关键词检索</td><td>每类 2–3 个关键词，半径 1500 m，最多 3 页，scope=2 取 tag</td><td class="n">22 次检索，366 条原始命中</td></tr>
+    <tr><td>uid 去重</td><td>同 uid 按类别数组顺序归属，硬指标在前</td><td class="n">跨类别剔除 1</td></tr>
+    <tr><td>名称黑名单</td><td>小学 → 剔除托管 / 培训 / 教辅 / 书店 / 文具；药店 → 剔除宠物 / 健康药业</td><td class="n">剔除 9</td></tr>
+    <tr><td>tag 白名单 / 黑名单</td><td>primary_school 要求 tag 含「教育培训;小学」；公交类剔除道路 / 出入口</td><td class="n">剔除 5 + 2</td></tr>
+    <tr><td>跨类归属</td><td>名称含「生鲜 / 农贸」→ 菜市场；「社区卫生服务」→ 社区医疗；「地铁」→ 公交站</td><td>—</td></tr>
+    <tr><td>直线预筛 + 候选上限</td><td>haversine &gt; 1800 m 剔除；每类最近 12 个进算路，其余标 estimate</td><td class="n">最终 349 条，估算 0</td></tr>
+  </table>
+
+  <h3>4 · 200 m 网格盲区与建议补点方位</h3>
+  <p>盲区定义直接对应赛题「缺失即盲区」：1 km 内缺任一硬指标。用直线而非算路——225 格 × 3 类若都算路要 675 对（14 次调用），而盲区是宏观判断；200 m 是「100 m 视觉无差异」与「500 m 漏掉小区级缺口」之间的取舍。簇质心 c 与最近已有设施 p 的方位角 bearing(p → c)、距离 max(0, dist − 1000) 即为建议补点位置，按「新增一点可消除的盲区格数」排优先级。</p>
+
+  <h3>5 · 本地纯函数重算的模拟</h3>
+  <p><span class="num">applyVirtualFacilities(report, virtuals)</span> 把拟建设施并入报告后重跑 scoreCategories / detectBlindSpots / buildOverall，约 1 ms、幂等、不改入参。服务端每次放置只被调一次 /api/walk。规划建议旁「去模拟」把建议的类别直接带入放置模式，形成「发现缺口 → 试着补 → 看效果」闭环。</p>
+
+  <h3>6 · 街道级串行批量与快速模式</h3>
+  <p>批量不是并发 N 条流水线，而是<b>串行</b>复用同一个 API 客户端：缓存与限流共享，相邻点位的 POI 检索大量命中缓存；每点 apiStats 记增量、整批取累计。快速模式 8 方向 × 5 半径 40 个采样点，等时圈算路从 3 批降到 1 批。璧山 13 点实测：268 次检索、4604 点对、11 次退避、0 降级，56.6 s 完成。</p>
+  <div class="rf"><span>github.com/chunge-php/quanjian · MIT</span><span>06</span></div>
+</section>
+
+<!-- ===================== 五 ===================== -->
+<section class="page">
+  <div class="rh"><span>圈见 · 作品介绍</span><span>五 · 真实对比测试</span></div>
+  <h2><span class="no">05</span>真实对比测试</h2>
+  <p class="lead">全部数字来自 <span class="num">docs/测试报告.md</span>：样例 <span class="num">data/samples/bishan-biquan.json</span> 与脚本 <span class="num">scripts/verify-report.ts</span> 在同一中心点（BD-09 106.2277, 29.5921，重庆璧山·璧城街道东林大道）的实时输出，评委可自行重跑；离线部分任何机器数字一致。</p>
+
+  <div class="cols3" style="margin:2mm 0 4mm">
+    <div class="stat"><div class="v red">43.5%</div><div class="l">15 分钟等时圈 1.5932 km² ÷ 1080 m 直线圆 3.6644 km²；平均各向收缩 33.6%</div></div>
+    <div class="stat"><div class="v">7.7%</div><div class="l">批量算路 vs 单条规划的时长差平均值（最大 17.9%）；距离差 0–0.6%</div></div>
+    <div class="stat"><div class="v">20 / 20</div><div class="l">并发 6 下 20 次并发算路，7 次 401 退避，最终 200/200 点对无丢失</div></div>
+  </div>
+
+  <h3>等时圈边界核验（4 顶点单条步行规划）</h3>
+  <table class="avoid">
+    <tr><th>方位</th><th class="n">插值半径 m</th><th class="n">实际步行 m</th><th class="n">实际分钟</th><th class="n">绕行系数</th><th>落在 13–17 min</th></tr>
+    <tr><td>0°</td><td class="n">813</td><td class="n">987</td><td class="n">15.1</td><td class="n">1.21</td><td class="ok">是</td></tr>
+    <tr><td>90°</td><td class="n">603</td><td class="n">1017</td><td class="n">15.3</td><td class="n">1.69</td><td class="ok">是</td></tr>
+    <tr><td>180°</td><td class="n">887</td><td class="n">1241</td><td class="n">18.7</td><td class="n">1.40</td><td>否（750–1000 m 步长内绕行陡增）</td></tr>
+    <tr><td>270°</td><td class="n">675</td><td class="n">1003</td><td class="n">14.8</td><td class="n">1.49</td><td class="ok">是</td></tr>
+  </table>
+  <p class="small muted" style="margin-top:2mm">3/4 命中，命中点步行距离 987–1017 m（1080 m 的 91–94%）。180° 偏差是 250 m 插值步长的固有精度，测试报告已列为已知限制。</p>
+
+  <h3>盲区判定核验</h3>
+  <p class="small">177 格中 30 格为盲区，全部只缺「小学」，连成 1 簇位于中心西侧 0.6–1.5 km、全部在圈外。抽 3 格在格心以 1 km 半径独立检索「小学」，原始命中均为 0——不存在被清洗规则误杀的情况。</p>
+
+  <h3>API 调用统计与耗时</h3>
+  <table class="avoid">
+    <tr><th>指标</th><th class="n">冷缓存</th><th class="n">热缓存</th><th>指标</th><th class="n">冷缓存</th><th class="n">热缓存</th></tr>
+    <tr><td>geocode / placeSearch / routeMatrix</td><td class="n">1 / 22 / 6</td><td class="n">1 / 22 / 6</td><td>routeMatrixPairs</td><td class="n">461</td><td class="n">461</td></tr>
+    <tr><td>cacheHits / rateLimited / degraded</td><td class="n">0 / 1 / 0</td><td class="n">29 / 0 / 0</td><td>首个 partial（等时圈可见）</td><td class="n">2086 ms</td><td class="n">5 ms</td></tr>
+    <tr class="sum"><td>总耗时</td><td class="n key">6469 ms</td><td class="n key">25 ms</td><td>本地计算合计（采样 / 等时圈 / 评分 / 盲区）</td><td class="n">23 ms</td><td class="n">2 ms</td></tr>
+  </table>
+  <p class="small muted" style="margin-top:2mm">冷跑网络 I/O 占 99.6%；假 AK 时 259 ms 内回退到内置样例并带 warning，dataSource=sample，无空白页。</p>
+
+  <h3>街道级批量体检：璧山两次实跑</h3>
+  <table class="avoid">
+    <tr><th>范围</th><th class="n">点数 / 点距</th><th class="n">平均分</th><th class="n">最高 / 最低</th><th>结论摘录</th><th class="n">耗时 / API</th></tr>
+    <tr><td>东林大道周边，圆 1500 m（7.07 km²）</td><td class="n">13 / 698 m</td><td class="n key">80</td><td class="n">94 / 61</td><td class="small">小学 15 分钟可达的点位只有 62%（8/13）是最短板；7/13 达 A 级；圈内盲区最多的是雪松路 29 格</td><td class="n small">56.6 s · 268 检索 · 4604 点对 · 11 退避 · 0 降级</td></tr>
+    <tr><td>东林大道北段、近 G319，圆 1500 m（7.07 km²）</td><td class="n">13 / 698 m</td><td class="n key">34</td><td class="n">78 / 0</td><td class="small">优 0 良 1 中 4 差 8；小学 15 分钟可达的点位仅 8%（1/13）；圈内盲区最多的是鸡冠石路 38 格；结论自动写出「街道内部差距很大」</td><td class="n small">实时调用 · 同一参数 · 约 60 s</td></tr>
+  </table>
+  <div class="rf"><span>github.com/chunge-php/quanjian · MIT</span><span>07</span></div>
+</section>
+
+<!-- ===================== 六 + 七 ===================== -->
+<section class="page">
+  <div class="rh"><span>圈见 · 作品介绍</span><span>六 · 应用场景 ／ 七 · 开源工程</span></div>
+  <h2><span class="no">06</span>应用场景</h2>
+  <div class="cols">
+    <div class="card"><h4>社区规划部门：体检与选址</h4><p>街道级批量体检一次给出整条街道的短板类别与最差点位；点击「去模拟」在图上放一处拟建小学 / 药店 / 菜市场，看盲区消除多少格、评级升几档，再决定选址。报告 PDF 可直接附在方案里。</p></div>
+    <div class="card"><h4>居民：选房对比</h4><p>把两个候选小区放进 A / B 槽位，看谁的菜市场、小学、药店步行更近、谁的 15 分钟圈被河和铁路切得更碎；结论一句话自动生成，不用懂 GIS。</p></div>
+    <div class="card"><h4>开发商 / 物业：配套评估</h4><p>拿地前对地块做一次体检，圆度低说明通达性差、需要过街过河通道；缺失的硬指标类别直接对应配建清单。</p></div>
+    <div class="card"><h4>研究者：批量普查</h4><p>Docker 一键部署后用 <span class="num">POST /api/batch</span> 或脚本跑多个范围，apiStats 全程可观测；缓存 7 天可反复复算，评分模型与服务半径在 lib/categories.ts 可改。</p></div>
+  </div>
+
+  <h2 style="margin-top:7mm"><span class="no">07</span>开源工程</h2>
+  <div class="cols">
+    <div>
+      <h3>可构建 · 可测试 · 可部署</h3>
+      <ul class="small">
+        <li><b>CI</b>：每次 push / PR 依次 Prettier → ESLint → tsc → Vitest → Next build，占位 AK 不调真实接口。</li>
+        <li><b>163 个单元测试 / 19 个文件</b>：几何、采样、插值、清洗、评分、盲区、限流器、流水线、批量、对比打印、模拟。</li>
+        <li><b>Docker</b>：多阶段 node:20-alpine、非 root、HEALTHCHECK；推 <span class="num">v*.*.*</span> 标签自动发布 ghcr.io/chunge-php/quanjian；scripts/demo.sh 一键起停。</li>
+        <li><b>安全</b>：服务端 AK 只在 Node 进程；日志 / SSE / apiStats 不含 AK；.env* 全部 gitignore；Dependabot 每周检查。</li>
+      </ul>
+    </div>
+    <div>
+      <h3>文档与治理</h3>
+      <ul class="small">
+        <li>README、技术设计文档（上：API 策略与等时圈；下：清洗 / 盲区 / 评分 / SSE / 错误矩阵）、真实社区测试报告与模板、演示视频脚本、模拟接线说明。</li>
+        <li>CONTRIBUTING、CODE_OF_CONDUCT、SECURITY、Issue / PR 模板；治理文档：单维护者阶段 → 满足条件邀请共同维护者，惰性共识 72 h。</li>
+        <li><b>MIT</b>；运行时依赖 next / react / zod（MIT）、echarts（Apache-2.0），无传染性许可证；样例数据为 API 派生结果，不再分发底图与原始 POI。</li>
+      </ul>
+    </div>
+  </div>
+  <table class="avoid" style="margin-top:3mm">
+    <tr><th>路线图</th><th>目标</th><th>要点</th></tr>
+    <tr><td class="num">v0.1</td><td>大赛版</td><td>单点体检闭环 + 两地对比 + 模拟新建 + 街道级批量（原计划 v0.2，已提前交付）+ PDF 详版 + 天气旁路</td></tr>
+    <tr><td class="num">v0.2</td><td>批量与区域视角</td><td>CSV 多中心导入、行政区级热力、历史对比（设施新增 / 关闭）、缓存管理界面</td></tr>
+    <tr><td class="num">v0.3</td><td>多模式出行</td><td>骑行等时圈、公交 / 地铁抽样可达、老年人 0.8 m/s 步速参数化、早晚高峰</td></tr>
+    <tr><td class="num">v1.0</td><td>平台化与众包</td><td>MapProvider 插件化（高德 / 腾讯 / OSM+OSRM）、坐标系适配、社区众包标注、第二位核心维护者</td></tr>
+  </table>
+  <div class="rf"><span>github.com/chunge-php/quanjian · MIT</span><span>08</span></div>
+</section>
+
+<!-- ===================== 八 + 结语 ===================== -->
+<section class="page" style="font-size:9pt;line-height:1.45">
+  <div class="rh"><span>圈见 · 作品介绍</span><span>八 · 评审维度对照 ／ 结语</span></div>
+  <h2><span class="no">08</span>评审维度对照表</h2>
+
+  <h3>百度地图企业赛题交付要求</h3>
+  <table class="rubric avoid">
+    <tr><th>赛题要求</th><th>我们做了什么</th><th>位置</th></tr>
+    <tr><td>地图 API 调用策略</td><td>六种接口分工；令牌桶 + 并发窗口 + 指数退避；两级缓存；实测 100 对 / 并发 2 上限；apiStats 可观测</td><td class="num small">lib/baidu · 设计文档上 §2 · LIMITS.md</td></tr>
+    <tr><td>等时圈生成算法（无底层路网）</td><td>16 × 7 扇形采样 → 批量算路 → 单调修正 → 插值 → 平滑 → 三环嵌套；圆度指标；实测 43.5%、4 顶点核验 3/4</td><td class="num small">lib/isochrone · 设计文档上 §3 · 测试报告 §1</td></tr>
+    <tr><td>多源 POI 数据清洗策略</td><td>多关键词、uid 去重、名称 / tag 黑白名单、跨类归属、直线预筛、候选上限；璧山 366 → 349 逐步计数</td><td class="num small">lib/report · 设计文档下 §1 · 测试报告 §2.1</td></tr>
+    <tr><td>服务盲区识别算法</td><td>200 m 网格 × 1 km 硬指标判定、严重度、簇合并、建议补点方位；3 格独立检索核验命中 0</td><td class="num small">lib/report/blindspot.ts · 测试报告 §3</td></tr>
+    <tr><td>评分与规划建议</td><td>TD/T 1062-2021 服务半径分段打分、硬指标权重 2 与一票否决、模板文案不依赖大模型；「去模拟」闭环</td><td class="num small">lib/report/scoring.ts · 设计文档下 §3</td></tr>
+    <tr><td>交互与渐进式输出</td><td>SSE 分阶段进度，2.1 s 先见等时圈；两地对比、模拟新建、街道级批量、图例筛选、PDF 详版</td><td class="num small">lib/pipeline · app/api · components/</td></tr>
+    <tr><td>错误处理 / 限流降级</td><td>12 条错误处理矩阵；四级降级链；无效 AK 259 ms 回退样例并明示；并发 6 压测 20/20 成功</td><td class="num small">设计文档下 §5 · 测试报告 §5.2–5.3</td></tr>
+  </table>
+
+  <h3>大赛评审维度（官方：技术创新 30 · 场景落地 30 · 开源治理 20 · 长期发展 20）</h3>
+  <table class="rubric avoid" style="font-size:8.2pt">
+    <tr><th>维度 · 权重</th><th>官方细则</th><th>对应事实</th></tr>
+    <tr><td>技术创新 30%</td><td class="small">技术路线独创性，是否解决已有方案未能解决的问题，相较同类有明确优势</td><td>不取路网、只靠 API 测时做扇形采样与空间插值的等时圈（直线圆高估 130% 的问题被量化解决）；本地纯函数的「假如新建」模拟；串行共享缓存的街道级批量体检</td></tr>
+    <tr><td>场景落地 30%</td><td class="small">可部署、可运行、可测试；场景真实；验证数据来自真实或仿真环境</td><td>Docker 一键、无 AK 样例回放；璧山两片街道真实调用结果；测试报告含 5 条单路核验、4 个边界点核验、限流压测；规划部门 / 居民 / 开发商 / 研究者四类场景</td></tr>
+    <tr><td>开源治理 20%</td><td class="small">协议与依赖合规，贡献机制与文档规范清晰；新项目看规划</td><td>MIT、依赖许可证清单（全部 MIT / Apache-2.0）、CI/CD、Issue / PR 模板、CONTRIBUTING / CoC / SECURITY、治理文档、Keep a Changelog</td></tr>
+    <tr><td>长期发展 20%</td><td class="small">持续维护能力、长期规划、治理结构与社区 / 组织支撑</td><td>路线图 v0.2 行政区级热力 → v0.3 骑行 / 公交多模式 → v1.0 多地图供应商插件化与数据众包；维护者承诺与发版流程写入开源治理文档；类型契约集中便于协作</td></tr>
+  </table>
+
+  <h3 style="margin-top:3mm">结语</h3>
+  <p>圈见想证明一件小事：只用地图开放 API、不下载路网、不训练模型，一个人也能把「15 分钟生活圈」从政策文本变成每个街道都能跑一遍的体检报告。它现在能告诉你东林大道西南边为什么走不远、秀湖公园缺的是一所小学、补在西边 700 m 能消 78 格盲区。接下来的路线图是骑行与公交、行政区级热力、多地图供应商——欢迎在仓库里一起做。</p>
+  <table class="meta avoid" style="margin-top:3mm;font-size:9.5pt">
+    <tr><td style="width:22mm;color:var(--ink-3);border:0">仓库</td><td class="num" style="border:0">https://github.com/chunge-php/quanjian</td></tr>
+    <tr><td style="color:var(--ink-3);border:0">镜像</td><td class="num" style="border:0">ghcr.io/chunge-php/quanjian:latest</td></tr>
+    <tr><td style="color:var(--ink-3);border:0">联系</td><td class="num" style="border:0">yuukitzsche@gmail.com · GitHub @chunge-php</td></tr>
+    <tr><td style="color:var(--ink-3);border:0">致谢</td><td style="border:0">百度地图开放平台 · 开源中国 OSCHINA · 自然资源部 TD/T 1062-2021</td></tr>
+  </table>
+  <div class="rf"><span>github.com/chunge-php/quanjian · MIT · 2026-09</span><span>09</span></div>
+</section>
+
+</body>
+</html>
