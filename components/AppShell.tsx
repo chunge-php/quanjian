@@ -36,20 +36,38 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
   const lastIsoRef = useRef<unknown>(null)
   const { state, run, cancel, reset } = useAnalyze()
 
-  // 后端健康检查：失败则切本地样例
+  // 后端健康检查：最多重试 3 次（开发模式首个请求要等路由编译），全部失败才切本地样例。
+  // 注意：React 严格模式会把首个 effect 立即清理，AbortError 不能算作后端故障。
   useEffect(() => {
     if (forceMock) return
     const ctrl = new AbortController()
-    fetch('/api/health', { signal: ctrl.signal })
-      .then((r) =>
-        r.ok ? (r.json() as Promise<Health>) : Promise.reject(new Error(String(r.status)))
-      )
-      .then((h) => setHealth(h))
-      .catch(() => {
+    let cancelled = false
+    const probe = async () => {
+      const delays = [0, 1200, 2500]
+      for (let i = 0; i < delays.length; i++) {
+        if (delays[i]) await new Promise((r) => setTimeout(r, delays[i]))
+        if (cancelled) return
+        try {
+          const r = await fetch('/api/health', { signal: ctrl.signal, cache: 'no-store' })
+          if (r.ok) {
+            const h = (await r.json()) as Health
+            if (!cancelled) setHealth(h)
+            return
+          }
+        } catch (e) {
+          if ((e as { name?: string })?.name === 'AbortError') return
+        }
+      }
+      if (!cancelled) {
         setBackendDown(true)
         setMock(true)
-      })
-    return () => ctrl.abort()
+      }
+    }
+    void probe()
+    return () => {
+      cancelled = true
+      ctrl.abort()
+    }
   }, [forceMock])
 
   useEffect(() => {
@@ -107,7 +125,7 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
   const notice = forceMock
     ? 'Mock 模式：数据为本地样例，仅用于演示与截图'
     : backendDown
-      ? '分析服务未就绪，已切换为本地样例；地图仍可浏览'
+      ? '连不上分析服务（/api/health 连续 3 次失败），已切换为本地样例；请确认服务已启动后刷新页面'
       : health && !health.hasServerAk
         ? '服务端未配置百度 AK，实时分析不可用，请从「样例」中选一个查看'
         : null
