@@ -2,3 +2,5 @@ node_modules
 .next
 data/samples/*.json
 pnpm-lock.yaml
+docs/print/
+dist/
