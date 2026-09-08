@@ -6,10 +6,8 @@ cd /d "%~dp0"
 REM 版本号：给了就用并写回 package.json；不给就把 package.json 的补丁号 +1
 set VER=%~1
 if "%VER%"=="" (
-  for /f "usebackq delims=" %%v in (`node -e "const f='package.json';const p=require('./'+f);const v=p.version.split('.').map(Number);v[2]++;p.version=v.join('.');require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n');console.log(p.version)"`) do set VER=%%v
-  echo ==^> 自动递增版本: !VER!（已写回 package.json）
-) else (
-  node -e "const f='package.json';const p=require('./'+f);p.version='%VER%';require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
+  for /f "usebackq delims=" %%v in (`node -e "const v=require('./package.json').version.split('.').map(Number);v[2]++;console.log(v.join('.'))"`) do set VER=%%v
+  echo ==^> 自动递增版本: !VER!（构建成功后写回 package.json）
 )
 if not exist .env.local ( echo 缺 .env.local（构建需要 NEXT_PUBLIC_BAIDU_BROWSER_AK） & exit /b 1 )
 findstr /b "NEXT_PUBLIC_BAIDU_BROWSER_AK=" .env.local >nul || ( echo .env.local 里没有 NEXT_PUBLIC_BAIDU_BROWSER_AK & exit /b 1 )
@@ -42,5 +40,6 @@ if defined SEVENZIP (
   powershell -NoProfile -Command "Compress-Archive -Path 'dist\pkg\*' -DestinationPath 'dist\quanjian-%VER%.zip' -Force"
 )
 rmdir /s /q dist\pkg
+node -e "const f='package.json';const p=require('./'+f);p.version='%VER%';require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
 echo ==^> 完成: dist\quanjian-%VER%.zip
 endlocal
