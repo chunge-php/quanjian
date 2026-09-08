@@ -62,8 +62,13 @@
   }
   /* ECharts 容器在打印时固定高度，避免 ResizeObserver 未触发时塌成 0 */
   /* 图表容器：保持组件自身高度，只裁掉超出部分（beforeprint 已按 A4 宽重绘） */
-  .echart-box {
+  /* 有预生成图片的图表：打印图片、藏 canvas；没有的退回打印 canvas */
+  .echart-box.has-print {
     display: none !important;
+  }
+  .echart-box:not(.has-print) {
+    width: 100% !important;
+    overflow: hidden !important;
   }
   .echart-print {
     display: block !important;
