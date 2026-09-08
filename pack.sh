@@ -18,8 +18,8 @@ mkdir -p dist/pkg/.next && cp -r .next/static dist/pkg/.next/static
 cp -r public dist/pkg/public
 mkdir -p dist/pkg/data && cp -r data/samples dist/pkg/data/samples
 cp .env.example dist/pkg/.env.example
-cp deploy/start.sh deploy/ecosystem.config.cjs deploy/服务器部署.md dist/pkg/
-chmod +x dist/pkg/start.sh
+cp deploy/start.sh deploy/install.sh deploy/ecosystem.config.cjs deploy/服务器部署.md dist/pkg/
+chmod +x dist/pkg/start.sh dist/pkg/install.sh
 ( cd dist/pkg && zip -qr "../quanjian-$VER.zip" . )
 rm -rf dist/pkg
 echo "==> 完成: dist/quanjian-$VER.zip ($(du -h "dist/quanjian-$VER.zip" | cut -f1))"
