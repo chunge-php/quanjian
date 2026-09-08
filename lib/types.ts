@@ -239,3 +239,75 @@ export type AnalyzeStage =
   | 'scoring'
   | 'blindspot'
   | 'done'
+
+/* ───────────────────────── 街道级批量体检 ───────────────────────── */
+
+/** 批量体检的范围：圆（中心+半径）或矩形（西南角/东北角） */
+export type BatchArea =
+  | { kind: 'circle'; center: LngLat; radiusM: number; name?: string }
+  | { kind: 'rect'; sw: LngLat; ne: LngLat; name?: string }
+
+export interface BatchRequest {
+  area: BatchArea
+  /** 网格点间距（米），默认 500；服务端会按 maxPoints 自动放大间距 */
+  spacingM?: number
+  /** 最多体检点数，默认 16，上限 25 */
+  maxPoints?: number
+  /** 快速模式：等时圈 8 方向 × 5 半径（默认 true，省一半算路） */
+  fast?: boolean
+  noCache?: boolean
+}
+
+/** 单个网格点的体检摘要（完整报告太大，只在 done 事件里给 reports） */
+export interface BatchPointSummary {
+  index: number
+  center: LngLat
+  address: string
+  overallScore: number
+  overallGrade: 'A' | 'B' | 'C' | 'D'
+  isoAreaKm2: number
+  /** 硬指标三项各自最近步行分钟（null=周边没有） */
+  essentialWalkMin: Record<'market' | 'pharmacy' | 'primary_school', number | null>
+  /** 圈内盲区网格数 */
+  blindInIso: number
+  /** 各类别是否 15 分钟内可达 */
+  reachable: Record<FacilityCategory, boolean>
+  reportId: string
+}
+
+/** 街道级汇总 */
+export interface BatchReport {
+  id: string
+  generatedAt: string
+  area: BatchArea
+  areaKm2: number
+  spacingM: number
+  points: BatchPointSummary[]
+  /** 完整报告，按 points 顺序（供点选查看与打印） */
+  reports: HealthReport[]
+  /** 平均分 / 最高 / 最低 */
+  scoreAvg: number
+  scoreMax: number
+  scoreMin: number
+  /** 各类别"15 分钟内可达"的点位占比 0-1 */
+  coverageByCategory: { category: FacilityCategory; label: string; essential: boolean; ratio: number }[]
+  /** 最差的三个点（index） */
+  worst: number[]
+  /** 最好的三个点 */
+  best: number[]
+  /** 中文结论（≤4 条） */
+  headline: string[]
+  /** 街道级建议（按优先级） */
+  suggestions: { priority: 'high' | 'medium' | 'low'; text: string; category?: FacilityCategory }[]
+  apiStats: ApiStats
+  dataSource: 'live' | 'sample' | 'mixed'
+  warnings: string[]
+}
+
+/** 批量体检 SSE 事件 */
+export type BatchEvent =
+  | { type: 'plan'; points: LngLat[]; spacingM: number; areaKm2: number }
+  | { type: 'point'; index: number; total: number; summary: BatchPointSummary }
+  | { type: 'progress'; index: number; total: number; stage: AnalyzeStage; message: string }
+  | { type: 'done'; report: BatchReport }
+  | { type: 'error'; message: string; recoverable: boolean; index?: number }
