@@ -21,6 +21,7 @@ mkdir dist\pkg\data\samples
 xcopy /e /i /q /y data\samples dist\pkg\data\samples >nul
 copy /y .env.example dist\pkg\.env.example >nul
 copy /y deploy\start.sh dist\pkg\start.sh >nul
+copy /y deploy\install.sh dist\pkg\install.sh >nul
 copy /y deploy\ecosystem.config.cjs dist\pkg\ecosystem.config.cjs >nul
 copy /y deploy\服务器部署.md dist\pkg\服务器部署.md >nul
 if exist dist\quanjian-%VER%.zip del /q dist\quanjian-%VER%.zip
