@@ -111,6 +111,16 @@ pnpm dev                      # http://localhost:3010
 
 生产方式运行：`pnpm build && pnpm start`（standalone 输出在 `.next/standalone/`）。
 
+### 路线 C：Linux 服务器（standalone 包 + 一条命令）
+
+```bash
+./pack.sh                     # Windows：pack   → dist/quanjian-<版本>.zip + dist/install.sh
+# 两个文件传到服务器同一目录，然后：
+bash install.sh               # 首次问服务端 AK 和域名；以后同样命令=更新；--rollback 回退，--status 看状态
+```
+
+服务器只需 Node ≥18 + systemd（宝塔可用；没有 systemd 的机器加 `--pm2`），装完是 `releases/<版本>/ + current 软链 + shared/.env`，自动写 systemd 单元和宝塔 nginx 反向代理（含 SSE 三行）。参数表、目录结构、回退/卸载、百度 AK 白名单、常见问题见 **[docs/deploy.md](docs/deploy.md)**。
+
 ---
 
 ## 环境变量
@@ -186,7 +196,8 @@ quanjian/
 │   └── cache/           # 磁盘缓存（gitignore，Docker 卷）
 ├── tests/               # Vitest 单元测试
 ├── scripts/             # setup / demo 一键脚本（sh + cmd）
-├── docs/                # 技术设计 · 测试报告 · 演示脚本 · 开源治理
+├── deploy/              # 服务器安装脚本 install.sh（systemd 为主，pm2 备用）· pack.sh/pack.cmd 打 standalone 包
+├── docs/                # 技术设计 · 测试报告 · 演示脚本 · 开源治理 · 服务器部署（deploy.md）
 └── .github/             # CI · Docker 发布 · Issue/PR 模板 · Dependabot
 ```
 
