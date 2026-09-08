@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: format · lint · typecheck · test · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Prettier
+        run: pnpm format:check
+
+      - name: ESLint
+        run: pnpm lint
+
+      - name: TypeScript
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Build (占位 AK，仅验证可构建，不会真实调用百度 API)
+        env:
+          BAIDU_SERVER_AK: ci-placeholder-server-ak
+          NEXT_PUBLIC_BAIDU_BROWSER_AK: ci-placeholder-browser-ak
+          ALLOW_SAMPLE_FALLBACK: 'true'
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: pnpm build

@@ -1,0 +1,37 @@
+name: 功能建议
+description: 新能力、算法改进、体验优化
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 想解决什么问题
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案
+      description: 若涉及算法或 API 调用策略，请说明会新增多少次 API 调用
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: 涉及模块
+      multiple: true
+      options:
+        [
+          lib/baidu（API 客户端）,
+          lib/isochrone（等时圈）,
+          lib/report（评分/盲区）,
+          lib/pipeline + app/api（流水线）,
+          components（地图/报告 UI）,
+          文档 / 部署 / CI,
+        ]
+  - type: checkboxes
+    id: roadmap
+    attributes:
+      label: 路线图
+      options:
+        - label: 我已查看 ROADMAP.md，此建议未在其中

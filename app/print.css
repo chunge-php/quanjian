@@ -1,0 +1,61 @@
+/* 圈见 · 打印样式：报告纵向 A4，地图与控件隐藏 */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 14mm 14mm 16mm;
+  }
+
+  html,
+  body {
+    height: auto;
+    overflow: visible;
+    background: #fff;
+    color: #1a1a1a;
+  }
+
+  .no-print,
+  .map-root,
+  .map-ui,
+  .toast-root {
+    display: none !important;
+  }
+
+  .drawer {
+    position: static !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  .drawer-scroll {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  .sheet {
+    background-image: none;
+  }
+
+  .print-break {
+    break-before: page;
+  }
+  .print-avoid {
+    break-inside: avoid;
+  }
+
+  details.print-open > summary {
+    list-style: none;
+  }
+  details.print-open:not([open]) > *:not(summary) {
+    display: block;
+  }
+
+  a[href]::after {
+    content: '';
+  }
+}

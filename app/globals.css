@@ -1,0 +1,327 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────
+   圈见 · 设计令牌 —— 城市规划图纸
+   纸：米白哑光图纸  线：墨线  朱砂：盲区  青：可达圈
+   ───────────────────────────────────────────── */
+:root {
+  --paper: #f3ede0;
+  --paper-2: #ebe3d1;
+  --paper-3: #e2d9c4;
+  --ink: #23261f;
+  --ink-2: #4b4e45;
+  --ink-3: #6f6b5f;
+  --line: #cbc1aa;
+  --line-strong: #a89e86;
+
+  --vermilion: #c0391d;
+  --vermilion-deep: #8f2812;
+  --vermilion-tint: rgba(192, 57, 29, 0.12);
+  --teal: #1f6e6a;
+  --teal-deep: #154f4c;
+  --teal-tint: rgba(31, 110, 106, 0.14);
+  --ochre: #b0801f;
+  --moss: #4f7a3a;
+
+  --grade-a: var(--teal);
+  --grade-b: var(--moss);
+  --grade-c: var(--ochre);
+  --grade-d: var(--vermilion);
+
+  --font-sans: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans CJK SC', 'Noto Sans SC',
+    'Source Han Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-serif: 'Songti SC', 'STSong', 'Noto Serif CJK SC', 'Noto Serif SC', 'Source Han Serif SC',
+    'SimSun', Georgia, serif;
+  --font-figure: 'SF Mono', 'Menlo', 'Consolas', 'Noto Sans Mono CJK SC', ui-monospace, monospace;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  --z-map-ui: 10;
+  --z-drawer: 20;
+  --z-overlay: 30;
+  --z-toast: 40;
+
+  --drawer-w: 400px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+body {
+  overflow: hidden;
+}
+
+::selection {
+  background: var(--teal-tint);
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+/* 图纸材质：细网格 + 纸纹，只在面板上用，地图不用 */
+.sheet {
+  background-color: var(--paper);
+  background-image: linear-gradient(to right, rgba(35, 38, 31, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(35, 38, 31, 0.045) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* 图幅角标（四角十字线） */
+.sheet-corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+.sheet-corner::before,
+.sheet-corner::after {
+  content: '';
+  position: absolute;
+  background: var(--line-strong);
+}
+.sheet-corner::before {
+  left: 0;
+  top: 6px;
+  width: 14px;
+  height: 1px;
+}
+.sheet-corner::after {
+  top: 0;
+  left: 6px;
+  width: 1px;
+  height: 14px;
+}
+
+/* 标注引线：小圆点 + 折线，用于硬指标卡与图例 */
+.leader {
+  position: relative;
+  padding-left: 18px;
+}
+.leader::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 2px var(--paper);
+}
+.leader::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: calc(0.55em + 3px);
+  width: 8px;
+  height: 1px;
+  background: currentColor;
+}
+
+/* 髮丝线 */
+.hairline {
+  height: 1px;
+  background: var(--line);
+  transform: scaleY(0.6);
+  transform-origin: center;
+}
+
+.figure {
+  font-family: var(--font-figure);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+.kicker {
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* 图章：仅评级用，-6° 旋转，双线框 */
+.stamp {
+  display: inline-block;
+  transform: rotate(-6deg);
+  border: 2px solid currentColor;
+  padding: 0.05em 0.35em;
+  box-shadow:
+    inset 0 0 0 2px var(--paper),
+    inset 0 0 0 3px currentColor;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  opacity: 0.86;
+}
+
+/* 按钮 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  padding: 0 0.9rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 160ms var(--ease-out),
+    color 160ms var(--ease-out),
+    border-color 160ms var(--ease-out);
+}
+.btn:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+.btn:disabled,
+.btn-primary:disabled,
+.btn:disabled:hover {
+  cursor: not-allowed;
+  border-color: var(--line);
+  color: var(--ink-3);
+  background: var(--paper-2);
+}
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+.btn-primary:hover {
+  background: var(--teal-deep);
+  border-color: var(--teal-deep);
+}
+.btn-ghost {
+  border-color: transparent;
+}
+.btn-ghost:hover {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+.btn-icon {
+  width: 2.5rem;
+  padding: 0;
+  justify-content: center;
+}
+
+.input {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0 0.75rem;
+  background: var(--paper);
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  font-size: 0.9375rem;
+}
+.input::placeholder {
+  color: var(--ink-3);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px var(--teal-tint);
+}
+
+/* 滚动条 */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+.scroll-thin::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+}
+
+/* 进度条 */
+.progress-track {
+  height: 3px;
+  background: var(--paper-3);
+}
+.progress-bar {
+  height: 100%;
+  width: 100%;
+  background: var(--teal);
+  transform-origin: left;
+  transition: transform 320ms var(--ease-out);
+}
+
+@keyframes ink-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+.blink {
+  animation: ink-blink 1.1s ease-in-out infinite;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.rise-in {
+  animation: rise-in 360ms var(--ease-out) both;
+}
+
+/* 底图洗成图纸色：降饱和 + 轻微泛黄；叠加层颜色已预加饱和抵消 */
+.map-canvas {
+  filter: saturate(0.42) sepia(0.2) contrast(0.96);
+}
+
+/* 百度地图版权/logo 收敛到角落，不遮盖 UI */
+.anchorBL,
+.BMap_cpyCtrl {
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
