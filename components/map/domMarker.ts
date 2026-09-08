@@ -31,6 +31,7 @@ export function getDomMarkerClass(B: typeof BMapGL): Ctor {
     private _map: BMapGL.Map | null = null
     private _point: BMapGL.Point
     private _opts: DomMarkerOptions
+    private _redraw: (() => void) | null = null
     el: HTMLElement | null = null
     constructor(point: BMapGL.Point, opts: DomMarkerOptions) {
       super()
@@ -51,15 +52,42 @@ export function getDomMarkerClass(B: typeof BMapGL): Ctor {
       img.style.cssText = 'display:block;width:100%;height:100%;'
       if (o.title) div.title = o.title
       div.appendChild(img)
-      if (o.onClick) {
-        div.addEventListener('click', (e) => {
-          e.stopPropagation()
-          o.onClick?.()
-        })
+      // 阻断所有指针事件冒泡到地图容器：百度地图用 mousedown/up 合成 click，
+      // 只拦 click 会导致点设施时地图也收到一次点击（中心点被挪走）
+      for (const t of [
+        'mousedown',
+        'mouseup',
+        'pointerdown',
+        'pointerup',
+        'touchstart',
+        'touchend',
+        'dblclick',
+      ]) {
+        div.addEventListener(t, (e) => e.stopPropagation(), { passive: t.startsWith('touch') })
       }
+      div.addEventListener('click', (e) => {
+        e.stopPropagation()
+        o.onClick?.()
+      })
       map.getPanes().markerPane.appendChild(div)
       this.el = div
+      this._redraw = () => this.draw()
+      map.addEventListener('moving', this._redraw)
+      map.addEventListener('zooming', this._redraw)
+      map.addEventListener('zoomend', this._redraw)
+      map.addEventListener('moveend', this._redraw)
       return div
+    }
+    /** 从地图移除时清理监听与 DOM（BMapGL 在 removeOverlay 时调用） */
+    remove(): void {
+      if (this._map && this._redraw) {
+        this._map.removeEventListener('moving', this._redraw)
+        this._map.removeEventListener('zooming', this._redraw)
+        this._map.removeEventListener('zoomend', this._redraw)
+        this._map.removeEventListener('moveend', this._redraw)
+      }
+      this.el?.parentNode?.removeChild(this.el)
+      this.el = null
     }
     draw(): void {
       if (!this._map || !this.el) return

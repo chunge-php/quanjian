@@ -147,6 +147,9 @@ export default function MapView(props: MapViewProps) {
   useEffect(() => {
     if (!map) return
     const handler = (e: BMapGL.MapEvent) => {
+      // 点在 DOM 标记（设施/拟建）上：由标记自己处理，不当作地图点击（否则一点设施就把中心点挪走）
+      const target = e.domEvent?.target as HTMLElement | null | undefined
+      if (target && typeof target.closest === 'function' && target.closest('.qj-marker')) return
       const p = eventLngLat(e)
       if (!p) return
       const b = batchRef.current
