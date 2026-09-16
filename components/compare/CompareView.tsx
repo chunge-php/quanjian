@@ -1,6 +1,7 @@
 'use client'
 import { useMemo } from 'react'
 import type { HealthReport } from '@/lib/types'
+import type { Slot } from '@/lib/ui/compare'
 import { buildComparison } from '@/lib/ui/compare'
 import { Icon } from '@/components/Icon'
 import SectionHead from '@/components/report/SectionHead'
@@ -19,6 +20,9 @@ import { COMPARE_MAP_SIZE } from '@/components/compare/ComparePrint'
 interface Props {
   a: HealthReport
   b: HealthReport
+  /** 地图当前聚焦哪一边（设施 / 盲区只画这一边） */
+  focus: Slot
+  onFocus: (s: Slot) => void
   onSwap: () => void
   onChangeB: () => void
   onRemove: () => void
@@ -26,7 +30,16 @@ interface Props {
 }
 
 /** 对比视图：两张地图 → 两列分数 → 雷达叠加 → 分组柱 → 十类对照 → 硬指标 → 等时圈 / 盲区 → 结论（打印版见 ComparePrint） */
-export default function CompareView({ a, b, onSwap, onChangeB, onRemove, onPrint }: Props) {
+export default function CompareView({
+  a,
+  b,
+  focus,
+  onFocus,
+  onSwap,
+  onChangeB,
+  onRemove,
+  onPrint,
+}: Props) {
   const c = useMemo(() => buildComparison(a, b), [a, b])
   return (
     <article className="relative pb-2">
@@ -36,25 +49,43 @@ export default function CompareView({ a, b, onSwap, onChangeB, onRemove, onPrint
       <section className="print-avoid px-5 pb-4 pt-4 md:pt-5">
         <p className="kicker">生活圈体检 · 两地对比</p>
         <ul className="mt-1.5 space-y-1.5">
-          {[['A', a] as const, ['B', b] as const].map(([slot, r]) => (
-            <li key={slot} className="flex items-start gap-2">
-              <SlotChip slot={slot} size={18} />
-              <div className="min-w-0 flex-1">
-                <p className="break-words text-sm font-semibold leading-snug">
-                  {r.address.formatted || '未命名地点'}
-                </p>
-                {(r.address.district || r.address.city) && (
-                  <p className="text-xs text-[var(--ink-3)]">
-                    {[r.address.city, r.address.district, r.address.street]
-                      .filter(Boolean)
-                      .join(' · ')}
+          {[['A', a] as const, ['B', b] as const].map(([slot, r]) => {
+            const on = focus === slot
+            return (
+              <li key={slot} className="flex items-start gap-2">
+                <SlotChip slot={slot} size={18} />
+                <div className="min-w-0 flex-1">
+                  <p className="break-words text-sm font-semibold leading-snug">
+                    {r.address.formatted || '未命名地点'}
                   </p>
-                )}
-              </div>
-              <SourceBadge source={r.dataSource} />
-            </li>
-          ))}
+                  {(r.address.district || r.address.city) && (
+                    <p className="text-xs text-[var(--ink-3)]">
+                      {[r.address.city, r.address.district, r.address.street]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </p>
+                  )}
+                </div>
+                <SourceBadge source={r.dataSource} />
+                <button
+                  type="button"
+                  className={`no-print btn !min-h-7 shrink-0 gap-1 !px-2 text-[11px] ${
+                    on ? '!border-[var(--ink)] !bg-[var(--ink)] !text-[var(--paper)]' : ''
+                  }`}
+                  aria-pressed={on}
+                  onClick={() => onFocus(slot)}
+                  title={on ? `地图正在聚焦 ${slot}` : `地图切到 ${slot}：设施与盲区看这一边`}
+                >
+                  <Icon name="pin" size={12} />
+                  {on ? '地图聚焦中' : '地图看这边'}
+                </button>
+              </li>
+            )
+          })}
         </ul>
+        <p className="no-print mt-1.5 text-[11px] leading-4 text-[var(--ink-3)]">
+          两边设施同屏，聚焦的一边实色、另一边压淡并带 A / B 角标；点压淡的设施可直接切换。
+        </p>
 
         <div className="no-print mt-3 flex flex-wrap gap-2">
           <button type="button" className="btn !min-h-9 text-xs" onClick={onSwap}>

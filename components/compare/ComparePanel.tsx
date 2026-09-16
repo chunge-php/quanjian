@@ -23,6 +23,9 @@ interface Props {
   nameA: string
   nameB: string
   printing: boolean
+  /** 地图上设施与盲区当前聚焦哪一边；切 A / B 页签或点「地图看」按钮时同步 */
+  focus: Slot
+  onFocus: (s: Slot) => void
   onSwap: () => void
   onChangeB: () => void
   onRemove: () => void
@@ -47,6 +50,8 @@ export default function ComparePanel(p: Props) {
   /** 切 tab 后把抽屉滚到 tab 栏处，别停在上一份报告的中间 */
   const pickTab = (t: Tab) => {
     setTab(t)
+    // 看谁的完整报告，地图就聚焦谁：设施与盲区跟着切
+    if (t !== 'compare') p.onFocus(t)
     window.requestAnimationFrame(() => {
       const bar = tabBarRef.current
       const scroller = bar?.closest('.drawer-scroll')
@@ -88,6 +93,8 @@ export default function ComparePanel(p: Props) {
         <CompareView
           a={a}
           b={b}
+          focus={p.focus}
+          onFocus={p.onFocus}
           onSwap={p.onSwap}
           onChangeB={p.onChangeB}
           onRemove={p.onRemove}

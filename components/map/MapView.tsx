@@ -52,6 +52,8 @@ export interface MapViewProps {
   onFocusChange: (s: Slot) => void
   /** 聚焦槽位的设施与盲区 */
   pois: Poi[] | null
+  /** 对比模式：未聚焦一边的设施（压淡同屏显示，点一下即切到那一边） */
+  otherPois?: Poi[] | null
   blindSpots: BlindSpotCell[] | null
   /** 聚焦槽位的等时圈（采样点用） */
   focusIsochrone: Isochrone | null
@@ -83,6 +85,7 @@ export default function MapView(props: MapViewProps) {
     focus,
     onFocusChange,
     pois,
+    otherPois = null,
     blindSpots,
     focusIsochrone,
     showSamples,
@@ -115,6 +118,20 @@ export default function MapView(props: MapViewProps) {
       : DEFAULT_FILTER
   )
   const visiblePois = useMemo(() => applyPoiFilter(pois, filter), [pois, filter])
+  const visibleOther = useMemo(() => applyPoiFilter(otherPois, filter), [otherPois, filter])
+  const otherSlot: Slot = focus === 'A' ? 'B' : 'A'
+  const onFocusChangeRef = useRef(onFocusChange)
+  onFocusChangeRef.current = onFocusChange
+  // 点未聚焦一边的设施：先把地图切到那一边，再选中它（信息条随之显示）
+  const pendingPoiRef = useRef<Poi | null>(null)
+  const selectOther = useCallback(
+    (poi: Poi) => {
+      pendingPoiRef.current = poi
+      onFocusChangeRef.current(focus === 'A' ? 'B' : 'A')
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [focus]
+  )
   const counts = useMemo(() => countByCategory(pois), [pois])
   const centerChangeRef = useRef(onCenterChange)
   centerChangeRef.current = onCenterChange
@@ -182,7 +199,13 @@ export default function MapView(props: MapViewProps) {
     containerRef,
     setHover
   )
-  usePoiLayer(map, batchActive ? null : visiblePois, setSelectedPoi)
+  usePoiLayer(map, batchActive ? null : visiblePois, setSelectedPoi, {
+    slot: comparing ? focus : undefined,
+  })
+  usePoiLayer(map, batchActive || !comparing ? null : visibleOther, selectOther, {
+    slot: otherSlot,
+    muted: true,
+  })
   useVirtualPoiLayer(map, batchActive ? NO_VIRTUALS : virtuals, onRemoveVirtual)
   useBatchLayer(
     map,
@@ -218,8 +241,15 @@ export default function MapView(props: MapViewProps) {
     'B'
   )
 
-  // 选中的 POI 若已不在可见列表里（重新分析 / 被筛掉），关闭信息条
+  // 选中的 POI 若已不在可见列表里（重新分析 / 被筛掉），关闭信息条；
+  // 刚从另一边点过来的设施等这一边的列表换好后再选中
   useEffect(() => {
+    const pending = pendingPoiRef.current
+    if (pending && visiblePois?.some((p) => p.uid === pending.uid)) {
+      pendingPoiRef.current = null
+      setSelectedPoi(pending)
+      return
+    }
     setSelectedPoi((cur) => (cur && visiblePois?.some((p) => p.uid === cur.uid) ? cur : null))
   }, [visiblePois])
 

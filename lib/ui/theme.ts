@@ -162,7 +162,14 @@ export const CATEGORY_COLOR: Record<FacilityCategory, string> = {
 
 export function categoryMarkerUrl(
   category: FacilityCategory,
-  opts: { essential: boolean; dim: boolean }
+  opts: {
+    essential: boolean
+    dim: boolean
+    /** 对比模式：右上角挂 A 青 / B 赭 字母徽标，两边设施同屏也分得清 */
+    slot?: 'A' | 'B'
+    /** 未聚焦的一边：整体压淡，让聚焦侧更突出 */
+    muted?: boolean
+  }
 ): string {
   const { paths, circles = [] } = CATEGORY_ICON[category]
   const size = opts.essential ? 30 : 24
@@ -170,7 +177,7 @@ export function categoryMarkerUrl(
   const fg = '#ffffff'
   // 硬指标：墨色粗边 + 更大；其余：白边细框。圈外淡显。
   const border = opts.essential ? COLORS.ink : '#ffffff'
-  const opacity = opts.dim ? 0.38 : 1
+  const opacity = opts.dim ? 0.38 : opts.muted ? 0.55 : 1
   const inner = size - 10
   const scale = inner / 24
   const offset = 5
@@ -182,8 +189,22 @@ export function categoryMarkerUrl(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" opacity="${opacity}">` +
     `<rect x="1" y="1" width="${size - 2}" height="${size - 2}" rx="${r}" fill="${bg}" stroke="${border}" stroke-width="${opts.essential ? 2.2 : 1.5}"/>` +
     `<g transform="translate(${offset} ${offset}) scale(${scale})" fill="none" stroke="${fg}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${body}</g>` +
+    slotBadge(opts.slot, size) +
     `</svg>`
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+}
+
+/** 设施标记右上角的槽位徽标：实心圆 + 字母，白描边压住底色 */
+function slotBadge(slot: 'A' | 'B' | undefined, size: number): string {
+  if (!slot) return ''
+  const color = slot === 'A' ? MAP_OVERLAY.teal : MAP_OVERLAY.ochre
+  const r = size >= 30 ? 7 : 6
+  const cx = size - r + 1
+  const cy = r - 1
+  return (
+    `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}" stroke="#ffffff" stroke-width="1.5"/>` +
+    `<text x="${cx}" y="${cy + r * 0.55}" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="${r * 1.5}" fill="${COLORS.paper}">${slot}</text>`
+  )
 }
 
 /**

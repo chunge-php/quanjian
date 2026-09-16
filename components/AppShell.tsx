@@ -240,6 +240,7 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
         focus={hasB ? focus : 'A'}
         onFocusChange={setFocus}
         pois={focused.pois}
+        otherPois={hasB ? (focus === 'B' ? A.pois : B.pois) : null}
         blindSpots={simw.blindSpots}
         focusIsochrone={focused.isochrone}
         showSamples={showSamples}
@@ -354,6 +355,8 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
             nameA={nameA}
             nameB={nameB}
             printing={printing}
+            focus={focus}
+            onFocus={setFocus}
             onSwap={onSwap}
             onChangeB={startCompare}
             onRemove={onRemove}

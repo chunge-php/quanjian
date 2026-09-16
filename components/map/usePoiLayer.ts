@@ -4,14 +4,23 @@ import type { LngLat, Poi } from '@/lib/types'
 import { categoryMarkerUrl, centerMarkerUrl, ESSENTIAL_SET } from '@/lib/ui/theme'
 import { getDomMarkerClass } from '@/components/map/domMarker'
 
+export interface PoiLayerOptions {
+  /** 对比模式：这一层属于哪一边，标记右上角挂字母徽标 */
+  slot?: 'A' | 'B'
+  /** 未聚焦的一边：压淡、压到聚焦侧下层 */
+  muted?: boolean
+}
+
 /** POI 标记：硬指标类别更醒目；圈外淡显；点击回传 */
 export function usePoiLayer(
   map: BMapGL.Map | null,
   pois: Poi[] | null,
-  onSelect: (poi: Poi) => void
+  onSelect: (poi: Poi) => void,
+  opts: PoiLayerOptions = {}
 ) {
   const onSelectRef = useRef(onSelect)
   onSelectRef.current = onSelect
+  const { slot, muted = false } = opts
 
   useEffect(() => {
     const B = window.BMapGL
@@ -22,21 +31,23 @@ export function usePoiLayer(
     const ordered = pois
       .slice()
       .sort((a, b) => Number(ESSENTIAL_SET.has(a.category)) - Number(ESSENTIAL_SET.has(b.category)))
+    // 未聚焦侧整层压在聚焦侧之下（聚焦侧 4~6，未聚焦 1~3）
+    const base = muted ? 0 : 3
     for (const poi of ordered) {
       const essential = ESSENTIAL_SET.has(poi.category)
       const size = essential ? 30 : 24
       const marker = new DomMarker(new B.Point(poi.location.lng, poi.location.lat), {
-        url: categoryMarkerUrl(poi.category, { essential, dim: !poi.inIsochrone }),
+        url: categoryMarkerUrl(poi.category, { essential, dim: !poi.inIsochrone, slot, muted }),
         size,
-        title: poi.name,
-        zIndex: essential ? 3 : poi.inIsochrone ? 2 : 1,
+        title: slot ? `${slot} · ${poi.name}` : poi.name,
+        zIndex: base + (essential ? 3 : poi.inIsochrone ? 2 : 1),
         onClick: () => onSelectRef.current(poi),
       })
       map.addOverlay(marker)
       overlays.push(marker)
     }
     return () => overlays.forEach((o) => map.removeOverlay(o))
-  }, [map, pois])
+  }, [map, pois, slot, muted])
 }
 
 /** 中心点标记：可拖动，拖完回传新坐标 */

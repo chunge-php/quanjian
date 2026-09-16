@@ -42,7 +42,7 @@ export default function CompareSwitch({ focus, nameA, nameB, runningB, onChange,
                   ? 'bg-[var(--ink)] text-[var(--paper)]'
                   : 'text-[var(--ink-2)] hover:bg-[var(--paper-2)]'
               }`}
-              title={`地图显示 ${it.slot} 的设施与盲区`}
+              title={`地图聚焦 ${it.slot}：这一边的设施实色、盲区可见`}
             >
               <span
                 className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-[var(--paper)]"
@@ -56,7 +56,8 @@ export default function CompareSwitch({ focus, nameA, nameB, runningB, onChange,
         })}
       </div>
       <p className="mt-1 inline-block rounded-[6px] bg-[var(--paper)]/90 px-1.5 py-0.5 text-[11px] leading-4 text-[var(--ink-2)]">
-        两个圈同屏，设施与盲区只看选中的一边；点地图 = 重设这一边的中心点
+        两边设施同屏：选中的一边实色，另一边压淡带角标（点它即切换）；盲区只看选中侧；点空白处 =
+        重设这一边的中心点
       </p>
     </div>
   )
