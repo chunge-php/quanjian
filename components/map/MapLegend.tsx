@@ -69,7 +69,13 @@ export default function MapLegend(p: Props) {
       {open && (
         <div
           id="map-legend"
-          className="panel rise-in mt-1 max-h-[32vh] w-[19rem] overflow-auto md:max-h-none scroll-thin border border-[var(--line-strong)] bg-[var(--paper)] px-3.5 py-3 text-[0.8125rem] leading-5"
+          className="panel rise-in scroll-thin mt-1 w-[min(19rem,calc(100vw-1.5rem))] overflow-auto border border-[var(--line-strong)] bg-[var(--paper)] px-3.5 py-3 text-[0.8125rem] leading-5 max-h-[60dvh] md:max-h-none"
+          style={{
+            // 手机：图例夹在搜索框（约 4.5rem）和抽屉顶边之间，按剩余高度算上限，内部滚动，不会被顶出屏幕或压进抽屉
+            maxHeight: p.bottomInset
+              ? `max(9rem, calc(100dvh - ${p.bottomInset + 12 + 40}px - 4.75rem))`
+              : undefined,
+          }}
         >
           {p.batch ? (
             <BatchLegend />
