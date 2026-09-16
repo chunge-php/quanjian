@@ -11,7 +11,7 @@ const MAX_PER_CATEGORY = 8
 /** 10 · 各类设施明细表（打印专用） */
 export function PrintCategoryTable({ report }: { report: HealthReport }) {
   return (
-    <section className="print-only print-avoid px-5 pt-6">
+    <section className="print-only px-5 pt-6">
       <SectionHead no="10" title="各类设施明细" note="按硬指标优先排序" />
       <table className="mt-2 w-full border-collapse text-[11.5px] leading-4">
         <thead>
@@ -117,7 +117,7 @@ export function PrintMethod({ report }: { report: HealthReport }) {
   const blindByDir = groupBlindByDirection(report)
   return (
     <>
-      <section className="print-only print-avoid px-5 pt-6">
+      <section className="print-only px-5 pt-6">
         <SectionHead no="12" title="各方向 15 分钟可达距离" note="米" />
         <p className="mt-1 text-[11.5px] leading-5 text-[var(--ink-2)]">{explainReach(report)}</p>
         <div className="mt-2 grid grid-cols-4 gap-x-4 gap-y-1 text-[11.5px]">
@@ -137,7 +137,7 @@ export function PrintMethod({ report }: { report: HealthReport }) {
       </section>
 
       {blindByDir.length > 0 && (
-        <section className="print-only print-avoid px-5 pt-6">
+        <section className="print-only px-5 pt-6">
           <SectionHead no="13" title="盲区分布" note="按方位统计" />
           <p className="mt-1 text-[11.5px] leading-5 text-[var(--ink-2)]">
             {explainBlindByDirection(report)}
@@ -169,7 +169,7 @@ export function PrintMethod({ report }: { report: HealthReport }) {
         </section>
       )}
 
-      <section className="print-only print-avoid px-5 pt-6">
+      <section className="print-only px-5 pt-6">
         <SectionHead no="14" title="数据与方法" note="可复现" />
         <ul className="mt-2 list-disc space-y-1 pl-4 text-[11.5px] leading-4 text-[var(--ink-2)]">
           <li>

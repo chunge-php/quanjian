@@ -9,7 +9,7 @@ const CN_NO = ['一', '二', '三']
 export default function ScoreHeader({ report }: { report: HealthReport }) {
   const color = GRADE_COLOR[report.overallGrade]
   return (
-    <section className="print-avoid px-5 pb-5 pt-4 md:pt-5">
+    <section className="print-keep px-5 pb-5 pt-4 md:pt-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="kicker">生活圈体检 · 中心点</p>

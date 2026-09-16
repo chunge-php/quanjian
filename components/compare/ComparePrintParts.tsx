@@ -38,7 +38,7 @@ export function TwoCol({
   className?: string
 }) {
   return (
-    <div className={`grid grid-cols-2 gap-x-5 ${className}`}>
+    <div className={`print-avoid grid grid-cols-2 gap-x-5 ${className}`}>
       <div className="min-w-0">
         <ColHead slot="A" name={c.nameA} />
         {a}

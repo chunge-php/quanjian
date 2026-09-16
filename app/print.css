@@ -54,11 +54,29 @@
   .drawer-handle {
     display: none !important;
   }
-  /* 图表与分节不跨页截断 */
-  section,
-  canvas,
-  table {
+  /* 分节允许跨页：整节 break-inside:avoid 会把放不下的一节整体推到下一页，留大片空白。
+     只保住不能拆的小单元：图表、图片、表格行、列表项、卡片；分节标题不落在页尾 */
+  section {
+    break-inside: auto;
+  }
+  section > header,
+  h2,
+  h3 {
+    break-after: avoid;
     break-inside: avoid;
+  }
+  canvas,
+  img,
+  tr,
+  li,
+  .print-keep,
+  .echart-box,
+  .echart-print,
+  .map-snapshot {
+    break-inside: avoid;
+  }
+  thead {
+    display: table-header-group;
   }
   /* ECharts 容器在打印时固定高度，避免 ResizeObserver 未触发时塌成 0 */
   /* 图表容器：保持组件自身高度，只裁掉超出部分（beforeprint 已按 A4 宽重绘） */
@@ -154,8 +172,7 @@
     break-inside: avoid;
     border-radius: 4px;
   }
-  /* 对比 PDF：每一节左 A 右 B 两列，表格与两列块不跨页 */
-  .cmp-print table,
+  /* 对比 PDF：每一节左 A 右 B 两列，两列块（地图对、分数对）不跨页；长表格按行拆 */
   .cmp-print .print-avoid {
     break-inside: avoid;
   }
@@ -172,6 +189,10 @@
     object-fit: contain;
   }
   .print-avoid {
+    break-inside: avoid;
+  }
+  /* 列表式两栏（圈内设施清单）：分组不拆，但整节可跨页 */
+  .columns-2 > * {
     break-inside: avoid;
   }
 

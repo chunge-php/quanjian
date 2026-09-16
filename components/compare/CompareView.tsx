@@ -46,7 +46,7 @@ export default function CompareView({
       <span className="sheet-corner left-2 top-2 hidden md:block" aria-hidden="true" />
       <span className="sheet-corner right-2 top-2 hidden md:block" aria-hidden="true" />
 
-      <section className="print-avoid px-5 pb-4 pt-4 md:pt-5">
+      <section className="px-5 pb-4 pt-4 md:pt-5">
         <p className="kicker">生活圈体检 · 两地对比</p>
         <ul className="mt-1.5 space-y-1.5">
           {[['A', a] as const, ['B', b] as const].map(([slot, r]) => {
@@ -107,7 +107,7 @@ export default function CompareView({
         </div>
       </section>
 
-      <section className="print-avoid px-5">
+      <section className="px-5">
         <SectionHead no="01" title="地图与等时圈" note="百度静态图" />
         <div className="grid grid-cols-2 gap-3">
           {[['A', a] as const, ['B', b] as const].map(([slot, r]) => (
@@ -125,12 +125,12 @@ export default function CompareView({
         </p>
       </section>
 
-      <section className="print-avoid px-5 pt-5">
+      <section className="px-5 pt-5">
         <SectionHead no="02" title="综合评分" note="谁高谁标「更优」" />
         <CompareScores c={c} />
       </section>
 
-      <section className="print-avoid px-5 pt-5">
+      <section className="px-5 pt-5">
         <SectionHead no="03" title="十类设施覆盖" note="雷达叠加 · 满分 100" />
         <CompareRadar c={c} />
         <PrintNote>
@@ -139,32 +139,32 @@ export default function CompareView({
         </PrintNote>
       </section>
 
-      <section className="print-avoid px-5 pt-5">
+      <section className="px-5 pt-5">
         <SectionHead no="04" title="最近步行分钟" note="每类两根柱 · 朱砂线 = 15 分钟" />
         <CompareWalkBars c={c} />
       </section>
 
-      <section className="print-avoid px-5 pt-5">
+      <section className="px-5 pt-5">
         <SectionHead no="05" title="十类对照" note="最近一处步行分钟" />
         <CompareTable c={c} />
       </section>
 
-      <section className="print-avoid px-5 pt-5">
+      <section className="px-5 pt-5">
         <SectionHead no="06" title="硬指标" note="缺一项即盲区" />
         <CompareEssentials c={c} />
       </section>
 
-      <section className="print-avoid px-5 pt-5">
+      <section className="px-5 pt-5">
         <SectionHead no="07" title="等时圈" note="15 分钟能走多远" />
         <MetricList rows={c.isoRows} label="等时圈指标对照" />
       </section>
 
-      <section className="print-avoid px-5 pt-5">
+      <section className="px-5 pt-5">
         <SectionHead no="08" title="服务盲区" note="200 m 网格 · 越少越好" />
         <MetricList rows={c.blindRows} label="盲区网格数对照" />
       </section>
 
-      <section className="print-avoid px-5 pt-5">
+      <section className="px-5 pt-5">
         <SectionHead no="09" title="结论" note="按类别分差自动生成" />
         <CompareConclusion c={c} />
       </section>

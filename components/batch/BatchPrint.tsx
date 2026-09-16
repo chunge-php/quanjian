@@ -29,14 +29,14 @@ import {
  * → 05 最差三点 → 06 建议与结论 → 07 方法说明 → 图签。
  */
 export default function BatchPrint({ report }: { report: BatchReport }) {
-  const sec = 'print-avoid px-5 pt-5'
+  const sec = 'px-5 pt-5'
   return (
     <div className="print-only cmp-print" data-testid="batch-print">
       <PrintFrame header={<BatchHeaderLine report={report} />}>
         <article className="pb-0">
           <BatchCover report={report} />
 
-          <section className="print-avoid px-5">
+          <section className="px-5">
             <SectionHead no="01" title="范围与体检点" note="百度静态图 · 点色 = 评级" />
             <BatchStaticMap report={report} />
           </section>

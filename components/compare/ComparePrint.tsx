@@ -60,7 +60,7 @@ export default function ComparePrint({ a, b, nameA, nameB }: Props) {
     const base = buildComparison(a, b)
     return { ...base, nameA: nameA || base.nameA, nameB: nameB || base.nameB }
   }, [a, b, nameA, nameB])
-  const sec = 'print-avoid px-5 pt-5'
+  const sec = 'px-5 pt-5'
 
   return (
     <div className="print-only cmp-print" data-testid="compare-print">
@@ -68,7 +68,7 @@ export default function ComparePrint({ a, b, nameA, nameB }: Props) {
         <article className="pb-0">
           <CompareCover c={c} />
 
-          <section className="print-avoid px-5">
+          <section className="px-5">
             <SectionHead no="01" title="地图与等时圈" note="百度静态图 · 圈内硬指标设施" />
             <TwoCol
               c={c}

@@ -18,7 +18,7 @@ export default function PrintGuide({ report }: { report: HealthReport }) {
   const iso = report.isochrone
   const r15 = iso.rings.find((r) => r.minutes === 15)
   return (
-    <section className="print-only print-avoid px-5 pt-6">
+    <section className="print-only px-5 pt-6">
       <SectionHead no="09" title="怎么看这份报告" note="写给普通读者" />
       <dl className="mt-2 space-y-3 text-[12.5px] leading-5">
         <Item term="什么是 15 分钟生活圈">

@@ -49,7 +49,7 @@ export default function ReportPanel({
         <span className="sheet-corner right-2 top-2 hidden md:block" aria-hidden="true" />
 
         <PrintChrome report={report} label={printLabel} />
-        <section className="print-only print-avoid px-5">
+        <section className="print-only px-5">
           <SectionHead no="01" title="地图与等时圈" note="百度静态图 · 圈内硬指标设施" />
           <MapSnapshot report={report} />
         </section>
@@ -87,25 +87,25 @@ export default function ReportPanel({
           </button>
         </div>
 
-        <section className="print-avoid px-5 pt-4">
+        <section className="px-5 pt-4">
           <SectionHead no="02" title="十类设施覆盖" note="雷达 · 满分 100" />
           <RadarChart categories={report.categories} />
           <PrintNote>怎么看：{explainRadar(report)}</PrintNote>
         </section>
 
-        <section className="print-avoid px-5 pt-5">
+        <section className="px-5 pt-5">
           <SectionHead no="03" title="最近步行分钟" note="朱砂线 = 15 分钟" />
           <WalkBarChart categories={report.categories} />
           <PrintNote>怎么看：{explainWalkBars(report)}</PrintNote>
         </section>
 
-        <section className="print-avoid px-5 pt-5">
+        <section className="px-5 pt-5">
           <SectionHead no="04" title="硬指标" note="缺一项即盲区" />
           <EssentialCards categories={report.categories} />
           <PrintNote>{essentialSummary(report)}</PrintNote>
         </section>
 
-        <section className="print-avoid px-5 pt-6">
+        <section className="px-5 pt-6">
           <SectionHead no="05" title="服务盲区" note="200 m 网格 · 1 公里内" />
           <BlindSpotSummary cells={report.blindSpots} />
           <PrintNote>
@@ -116,12 +116,12 @@ export default function ReportPanel({
           </PrintNote>
         </section>
 
-        <section className="print-avoid px-5 pt-6">
+        <section className="px-5 pt-6">
           <SectionHead no="06" title="规划建议" note={`${report.suggestions.length} 条`} />
           <Suggestions items={report.suggestions} onSimulate={onSimulate} />
         </section>
 
-        <section className="print-avoid px-5 pt-6">
+        <section className="px-5 pt-6">
           <SectionHead
             no="07"
             title="等时圈"
@@ -137,7 +137,7 @@ export default function ReportPanel({
           </PrintNote>
         </section>
 
-        <section className="print-avoid px-5 pt-6">
+        <section className="px-5 pt-6">
           <ApiStatsDetails stats={report.apiStats} forceOpen={printing} />
         </section>
 
@@ -146,7 +146,7 @@ export default function ReportPanel({
         <PrintPoiList report={report} />
         <PrintMethod report={report} />
 
-        <section className="print-avoid px-5 pt-6">
+        <section className="px-5 pt-6">
           <TitleBlock report={report} />
         </section>
       </article>
