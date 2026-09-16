@@ -78,6 +78,11 @@
   thead {
     display: table-header-group;
   }
+  /* 页眉框架表本身只有一行、装着整份报告：这一行必须允许跨页，否则整份报告先被推到下一页（空白页） */
+  .print-frame > thead > tr,
+  .print-frame > tbody > tr {
+    break-inside: auto !important;
+  }
   /* ECharts 容器在打印时固定高度，避免 ResizeObserver 未触发时塌成 0 */
   /* 图表容器：保持组件自身高度，只裁掉超出部分（beforeprint 已按 A4 宽重绘） */
   /* 有预生成图片的图表：打印图片、藏 canvas；没有的退回打印 canvas */
