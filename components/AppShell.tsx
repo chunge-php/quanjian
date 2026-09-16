@@ -256,6 +256,7 @@ export default function AppShell({ forceMock }: { forceMock: boolean }) {
         onCenterChange={onCenterChange}
         onStatus={onMapStatus}
         batch={batch.mapProps}
+        confirmClick={!picking && !running && !!focused.report}
       />
 
       <SearchBox

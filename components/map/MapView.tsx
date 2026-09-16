@@ -21,6 +21,10 @@ import { useBlindSpotLayer, type CellHover } from '@/components/map/useBlindSpot
 import { useVirtualPoiLayer } from '@/components/map/useVirtualPoiLayer'
 import MapLegend from '@/components/map/MapLegend'
 import CompareSwitch from '@/components/map/CompareSwitch'
+import PendingClickCard, {
+  usePendingMarker,
+  type PendingClick,
+} from '@/components/map/PendingClickCard'
 import PoiCard from '@/components/map/PoiCard'
 import BlindSpotTip from '@/components/map/BlindSpotTip'
 import { useBatchLayer, type BatchPointHover } from '@/components/map/useBatchLayer'
@@ -75,6 +79,8 @@ export interface MapViewProps {
   onStatus?: (status: 'loading' | 'ready' | 'error', error?: string) => void
   /** 街道体检：非空 = 批量模式（隐藏 POI / 盲区 / 等时圈，地图点击不再触发单点体检） */
   batch?: BatchMapProps | null
+  /** 已有报告时点地图先落待定点、弹卡确认，不直接重算（防误触）；首次体检 / 选对比地点仍即点即算 */
+  confirmClick?: boolean
 }
 
 export default function MapView(props: MapViewProps) {
@@ -101,7 +107,11 @@ export default function MapView(props: MapViewProps) {
     onCenterChange,
     onStatus,
     batch = null,
+    confirmClick = false,
   } = props
+  const [pending, setPending] = useState<PendingClick | null>(null)
+  const confirmClickRef = useRef(confirmClick)
+  confirmClickRef.current = confirmClick
   const containerRef = useRef<HTMLDivElement>(null)
   const { map, status, error } = useBaiduMap(containerRef, center)
   const [selectedPoi, setSelectedPoi] = useState<Poi | null>(null)
@@ -176,11 +186,21 @@ export default function MapView(props: MapViewProps) {
         return
       }
       if (placingRef.current) placeRef.current(placingRef.current, p)
-      else centerChangeRef.current(p, 'click', comparingRef.current ? focusRef.current : 'A')
+      else {
+        const slot: Slot = comparingRef.current ? focusRef.current : 'A'
+        if (confirmClickRef.current) setPending({ p, slot })
+        else centerChangeRef.current(p, 'click', slot)
+      }
     }
     map.addEventListener('click', handler)
     return () => map.removeEventListener('click', handler)
   }, [map])
+
+  // 待定点：进入批量 / 放置模式、或不再需要确认（分析开始）时清掉
+  useEffect(() => {
+    if (batchActive || placing || !confirmClick) setPending(null)
+  }, [batchActive, placing, confirmClick])
+  usePendingMarker(map, pending?.p ?? null)
 
   // 批量模式下隐藏普通模式的等时圈 / POI / 盲区 / 拟建层，避免混乱
   const showIso = filter.showIsochrone && !batchActive
@@ -354,7 +374,20 @@ export default function MapView(props: MapViewProps) {
           onToggleLayer={(k) => setFilter((f) => ({ ...f, [k]: !f[k] }))}
         />
       )}
-      {selectedPoi && !batchActive && (
+      {pending && !batchActive && (
+        <PendingClickCard
+          pending={pending}
+          comparing={comparing}
+          shifted={leftInset > 0}
+          onConfirm={() => {
+            const cur = pending
+            setPending(null)
+            centerChangeRef.current(cur.p, 'click', cur.slot)
+          }}
+          onCancel={() => setPending(null)}
+        />
+      )}
+      {selectedPoi && !batchActive && !pending && (
         <PoiCard poi={selectedPoi} onClose={() => setSelectedPoi(null)} shifted={leftInset > 0} />
       )}
       {hover && !batchActive && <BlindSpotTip hover={hover} bounds={bounds} />}
